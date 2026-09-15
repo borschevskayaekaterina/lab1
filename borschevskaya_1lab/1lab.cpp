@@ -209,3 +209,31 @@ int main() {
     return 0;
 }
 
+void addPipe() {
+    if (!pipe.isEmpty()) {
+        cout << "Pipe already exists! Overwrite? (y/n): ";
+        char answer;
+        cin >> answer;
+        if (answer != 'y' && answer != 'Y') {
+            cout << "Operation cancelled.\n";
+            return;
+        }
+    }
+    pipe.inputFromConsole();
+    cout << "Pipe added successfully!\n";
+}
+
+void addStation() {
+    if (!station.isEmpty()) {
+        cout << "Station already exists! Overwrite? (y/n): ";
+        char answer;
+        cin >> answer;
+        if (answer != 'y' && answer != 'Y') {
+            cout << "Operation cancelled.\n";
+            return;
+        }
+    }
+    station.inputFromConsole();
+    cout << "Compressor Station added successfully!\n";
+}
+
