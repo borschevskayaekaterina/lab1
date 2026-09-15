@@ -42,6 +42,11 @@ public:
         cout << "  Diameter: " << diameter << " mm\n";
         cout << "  Under repair: " << (isUnderRepair ? "Yes" : "No") << "\n";
     }
+
+    void toggleRepair() {
+        isUnderRepair = !isUnderRepair;
+        cout << "Repair status toggled. Now: " << (isUnderRepair ? "Under repair" : "Not under repair") << "\n";
+    }
 };
 
 class CompressorStation {
@@ -88,6 +93,26 @@ public:
         cout << "  Total shops: " << totalShops << "\n";
         cout << "  Active shops: " << activeShops << "\n";
         cout << "  Station class: " << stationClass << "\n";
+    }
+
+    void startShop() {
+        if (activeShops < totalShops) {
+            activeShops++;
+            cout << "Shop started. Active shops now: " << activeShops << "\n";
+        }
+        else {
+            cout << "Cannot start shop: all shops are already active!\n";
+        }
+    }
+
+    void stopShop() {
+        if (activeShops > 0) {
+            activeShops--;
+            cout << "Shop stopped. Active shops now: " << activeShops << "\n";
+        }
+        else {
+            cout << "Cannot stop shop: no active shops!\n";
+        }
     }
 
 };
