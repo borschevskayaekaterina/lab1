@@ -158,3 +158,54 @@ public:
 
 };
 
+Pipe pipe;
+CompressorStation station;
+
+void addPipe();
+void addStation();
+void viewAll();
+void editPipe();
+void editStation();
+void saveData();
+void loadData();
+
+int main() {
+    int choice;
+
+    while (true) {
+        cout << "\n===== Pipeline Management System =====\n";
+        cout << "1. Add Pipe\n";
+        cout << "2. Add Compressor Station\n";
+        cout << "3. View All Objects\n";
+        cout << "4. Edit Pipe (toggle repair)\n";
+        cout << "5. Edit Station (start/stop shop)\n";
+        cout << "6. Save Data\n";
+        cout << "7. Load Data\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+
+        while (!(cin >> choice)) {
+            cout << "Invalid input! Please enter a number: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+        switch (choice) {
+        case 1: addPipe(); break;
+        case 2: addStation(); break;
+        case 3: viewAll(); break;
+        case 4: editPipe(); break;
+        case 5: editStation(); break;
+        case 6: saveData(); break;
+        case 7: loadData(); break;
+        case 0:
+            cout << "Exiting program. Goodbye!\n";
+            return 0;
+        default:
+            cout << "Invalid choice! Please select 0-7.\n";
+        }
+    }
+
+    return 0;
+}
+
