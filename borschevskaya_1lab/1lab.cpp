@@ -51,6 +51,22 @@ public:
     bool isEmpty() const {
         return kilometerMark.empty() && length == 0.0 && diameter == 0;
     }
+
+    void saveToFile(ofstream& out) const {
+        out << "Pipe\n";
+        out << kilometerMark << "\n";
+        out << length << "\n";
+        out << diameter << "\n";
+        out << isUnderRepair << "\n";
+    }
+
+    void loadFromFile(ifstream& in) {
+        getline(in, kilometerMark);
+        in >> length;
+        in >> diameter;
+        in >> isUnderRepair;
+        in.ignore(numeric_limits<streamsize>::max(), '\n'); // очистка после bool
+    }
 };
 
 class CompressorStation {
@@ -121,6 +137,23 @@ public:
 
     bool isEmpty() const {
         return name.empty() && totalShops == 0 && activeShops == 0 && stationClass == 0;
+    }
+
+    void saveToFile(ofstream& out) const {
+        out << "CompressorStation\n";
+        out << name << "\n";
+        out << totalShops << "\n";
+        out << activeShops << "\n";
+        out << stationClass << "\n";
+    }
+
+
+    void loadFromFile(ifstream& in) {
+        getline(in, name);
+        in >> totalShops;
+        in >> activeShops;
+        in >> stationClass;
+        in.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
 };
