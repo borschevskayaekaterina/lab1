@@ -237,3 +237,58 @@ void addStation() {
     cout << "Compressor Station added successfully!\n";
 }
 
+void viewAll() {
+    cout << "\n--- Current Objects ---\n";
+    if (!pipe.isEmpty()) {
+        pipe.display();
+    }
+    else {
+        cout << "Pipe: Not created yet.\n";
+    }
+
+    cout << "\n";
+
+    if (!station.isEmpty()) {
+        station.display();
+    }
+    else {
+        cout << "Compressor Station: Not created yet.\n";
+    }
+    cout << "------------------------\n";
+}
+
+void editPipe() {
+    if (pipe.isEmpty()) {
+        cout << "Pipe does not exist! Please add pipe first.\n";
+        return;
+    }
+    pipe.toggleRepair();
+}
+
+void editStation() {
+    if (station.isEmpty()) {
+        cout << "Station does not exist! Please add station first.\n";
+        return;
+    }
+
+    int choice;
+    cout << "Edit Station:\n";
+    cout << "1. Start a shop\n";
+    cout << "2. Stop a shop\n";
+    cout << "Enter choice: ";
+
+    while (!(cin >> choice) || (choice != 1 && choice != 2)) {
+        cout << "Invalid input! Enter 1 or 2: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    if (choice == 1) {
+        station.startShop();
+    }
+    else {
+        station.stopShop();
+    }
+}
+
+
