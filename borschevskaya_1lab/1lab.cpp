@@ -291,4 +291,63 @@ void editStation() {
     }
 }
 
+void saveData() {
+    string filename;
+    cout << "Enter filename to save: ";
+    cin >> filename;
+
+    ofstream outFile(filename);
+    if (!outFile) {
+        cout << "Error: Cannot open file for writing!\n";
+        return;
+    }
+
+    pipe.saveToFile(outFile);
+    station.saveToFile(outFile);
+
+    outFile.close();
+    cout << "Data saved successfully to " << filename << "\n";
+}
+
+void loadData() {
+    string filename;
+    cout << "Enter filename to load: ";
+    cin >> filename;
+
+    ifstream inFile(filename);
+    if (!inFile) {
+        cout << "Error: Cannot open file for reading!\n";
+        return;
+    }
+
+    Pipe tempPipe;
+    CompressorStation tempStation;
+
+    string type;
+    getline(inFile, type);
+    if (type == "Pipe") {
+        tempPipe.loadFromFile(inFile);
+    }
+    else {
+        cout << "Error: Invalid file format! Expected 'Pipe'.\n";
+        inFile.close();
+        return;
+    }
+
+    getline(inFile, type);
+    if (type == "CompressorStation") {
+        tempStation.loadFromFile(inFile);
+    }
+    else {
+        cout << "Error: Invalid file format! Expected 'CompressorStation'.\n";
+        inFile.close();
+        return;
+    }
+
+    pipe = tempPipe;
+    station = tempStation;
+
+    inFile.close();
+    cout << "Data loaded successfully from " << filename << "\n";
+}
 
