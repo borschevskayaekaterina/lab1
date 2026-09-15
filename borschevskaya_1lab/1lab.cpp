@@ -47,6 +47,10 @@ public:
         isUnderRepair = !isUnderRepair;
         cout << "Repair status toggled. Now: " << (isUnderRepair ? "Under repair" : "Not under repair") << "\n";
     }
+
+    bool isEmpty() const {
+        return kilometerMark.empty() && length == 0.0 && diameter == 0;
+    }
 };
 
 class CompressorStation {
@@ -113,6 +117,10 @@ public:
         else {
             cout << "Cannot stop shop: no active shops!\n";
         }
+    }
+
+    bool isEmpty() const {
+        return name.empty() && totalShops == 0 && activeShops == 0 && stationClass == 0;
     }
 
 };
