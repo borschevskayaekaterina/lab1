@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Элементы решения/">
+    <File Path="../borschevskaya_lab1/borschevskaya_lab1/lab1.cpp" />
+  </Folder>
+  <Project Path="borschevskaya_1lab/borschevskaya_1lab.vcxproj" />
+</Solution>
