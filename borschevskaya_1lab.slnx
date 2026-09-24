@@ -3,8 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/Элементы решения/">
-    <File Path="../borschevskaya_lab1/borschevskaya_lab1/lab1.cpp" />
-  </Folder>
-  <Project Path="borschevskaya_1lab/borschevskaya_1lab.vcxproj" />
+  <Folder Name="/Элементы решения/" />
+  <Project Path="borschevskaya_1lab/borschevskaya_1lab.vcxproj" Id="47de66c0-1884-4b8e-ae36-8ac503fcb9b1" />
 </Solution>
