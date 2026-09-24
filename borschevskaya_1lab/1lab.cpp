@@ -18,7 +18,8 @@ public:
 
     void inputFromConsole() {
         cout << "Enter kilometer mark (name): ";
-        cin >> kilometerMark;//!!
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        getline(cin, kilometerMark);
         cout << "Enter length (km): ";
         while (!(cin >> length) || length <= 0) {
             cout << "Invalid input! Length must be positive number. Try again: ";
@@ -31,6 +32,8 @@ public:
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         isUnderRepair = false;
     }
@@ -81,8 +84,8 @@ public:
     CompressorStation() : totalShops(0), activeShops(0), stationClass(0) {}
 
     void inputFromConsole() {
-        cout << "Enter station name: ";
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Enter station name: ";
         getline(cin, name);
 
         cout << "Enter total number of shops: ";
@@ -105,6 +108,7 @@ public:
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
     void display() const {
