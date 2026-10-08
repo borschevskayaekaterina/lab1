@@ -1,9 +1,138 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <limits>
+#include <cctype>
+#include <ctime>
+#include <iomanip>
 
 using namespace std;
+
+class Logger {
+private:
+    ofstream logFile;
+
+    string currentTime() const {
+        time_t now = time(nullptr);
+        tm localTm;
+#ifdef _WIN32
+        localtime_s(&localTm, &now);
+#else
+        localtime_r(&now, &localTm);
+#endif
+        char buf[32];
+        strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &localTm);
+        return string(buf);
+    }
+
+public:
+    Logger(const string& filename) {
+        logFile.open(filename, ios::app);
+        if (!logFile) {
+            cerr << "Warning: Cannot open log file '" << filename << "'\n";
+        }
+    }
+
+    void log(const string& message) {
+        if (logFile) {
+            logFile << "[" << currentTime() << "] " << message << "\n";
+            logFile.flush();
+        }
+    }
+
+    ~Logger() {
+        if (logFile) logFile.close();
+    }
+};
+
+Logger* g_logger = nullptr;
+
+void log(const string& msg) {
+    if (g_logger) g_logger->log(msg);
+}
+
+bool isAllDigits(const string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!isdigit(static_cast<unsigned char>(c))) return false;
+    }
+    return true;
+}
+
+int readInt(const string& prompt) {
+    string line;
+    while (true) {
+        cout << prompt;
+        getline(cin, line);
+
+        size_t start = line.find_first_not_of(" \t");
+        size_t end = line.find_last_not_of(" \t");
+        if (start == string::npos) {
+            cout << "Invalid input! Enter an integer.\n";
+            continue;
+        }
+        line = line.substr(start, end - start + 1);
+
+        if (!isAllDigits(line)) {
+            cout << "Invalid input! Enter a valid integer.\n";
+            log("Invalid int input: \"" + line + "\"");
+            continue;
+        }
+
+        try {
+            return stoi(line);
+        }
+        catch (...) {
+            cout << "Invalid input! Number too large.\n";
+        }
+    }
+}
+
+double readDouble(const string& prompt) {
+    string line;
+    while (true) {
+        cout << prompt;
+        getline(cin, line);
+
+        size_t start = line.find_first_not_of(" \t");
+        size_t end = line.find_last_not_of(" \t");
+        if (start == string::npos) {
+            cout << "Invalid input! Enter a number.\n";
+            continue;
+        }
+        line = line.substr(start, end - start + 1);
+
+        bool hasDigit = false, hasDot = false, ok = true;
+        for (char c : line) {
+            if (isdigit(static_cast<unsigned char>(c))) hasDigit = true;
+            else if (c == '.') {
+                if (hasDot) { ok = false; break; }
+                hasDot = true;
+            }
+            else { ok = false; break; }
+        }
+        if (!ok || !hasDigit) {
+            cout << "Invalid input! Enter a valid number.\n";
+            log("Invalid double input: \"" + line + "\"");
+            continue;
+        }
+
+        try {
+            return stod(line);
+        }
+        catch (...) {
+            cout << "Invalid input! Try again.\n";
+        }
+    }
+}
+
+string readLine(const string& prompt) {
+    string line;
+    cout << prompt;
+    getline(cin, line);
+    return line;
+}
 
 class Pipe {
 private:
@@ -191,10 +320,18 @@ int main() {
         cout << "Enter your choice: ";
 
         while (!(cin >> choice)) {
-            cout << "Invalid input! Please enter a number: ";
+            cout << "Invalid input!";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
         }
+
+        char next = cin.peek();
+        if (next != '\n' && next != ' ' && next != '\t' && next != EOF) {
+            cout << "Invalid input! Only integers 0-7 allowed.\n";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         switch (choice) {
         case 1: addPipe(pipe); break;

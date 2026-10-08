@@ -1,0 +1,10 @@
+Pipe
+Moscow
+150.5
+1420
+1
+CompressorStation
+Compressor KS-1
+5
+4
+2
