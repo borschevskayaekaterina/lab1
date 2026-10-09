@@ -331,6 +331,59 @@ public:
 
 int CompressorStation::nextId = 1;
 
+struct PipeFilter {
+    enum Type { NONE, BY_MARK, BY_REPAIR } type;
+    string markPattern;
+    bool repairValue;
+
+    PipeFilter() : type(NONE), repairValue(false) {}
+
+    static PipeFilter byMark(const string& pattern) {
+        PipeFilter f; f.type = BY_MARK; f.markPattern = pattern; return f;
+    }
+    static PipeFilter byRepair(bool value) {
+        PipeFilter f; f.type = BY_REPAIR; f.repairValue = value; return f;
+    }
+
+    bool matches(const Pipe& p) const {
+        switch (type) {
+        case BY_MARK:   return p.getMark().find(markPattern) != string::npos;
+        case BY_REPAIR: return p.getRepairStatus() == repairValue;
+        default:        return true;
+        }
+    }
+};
+
+struct StationFilter {
+    enum Type { NONE, BY_NAME, BY_IDLE_PERCENT } type;
+    string namePattern;
+    double idlePercentMin;
+    double idlePercentMax;
+
+    StationFilter() : type(NONE), idlePercentMin(0), idlePercentMax(100) {}
+
+    static StationFilter byName(const string& pattern) {
+        StationFilter f; f.type = BY_NAME; f.namePattern = pattern; return f;
+    }
+    static StationFilter byIdlePercent(double minP, double maxP) {
+        StationFilter f; f.type = BY_IDLE_PERCENT;
+        f.idlePercentMin = minP; f.idlePercentMax = maxP; return f;
+    }
+
+    bool matches(const CompressorStation& s) const {
+        switch (type) {
+        case BY_NAME:
+            return s.getName().find(namePattern) != string::npos;
+        case BY_IDLE_PERCENT: {
+            double p = s.getIdlePercent();
+            return p >= idlePercentMin && p <= idlePercentMax;
+        }
+        default: return true;
+        }
+    }
+};
+
+
 void addPipe(Pipe& pipe);
 void addStation(CompressorStation& station);
 void viewAll(const Pipe& pipe, const CompressorStation& station);
