@@ -657,242 +657,68 @@ public:
 };
 
 int main() {
-    Pipe pipe;
-    CompressorStation station;
+    Logger logger("pipeline.log");
+    g_logger = &logger;
+    log("=== Program started ===");
 
-    int choice;
-
+    PipelineManager manager;
 
     while (true) {
         cout << "\n===== Pipeline Management System =====\n";
-        cout << "1. Add Pipe\n";
-        cout << "2. Add Compressor Station\n";
-        cout << "3. View All Objects\n";
-        cout << "4. Edit Pipe (toggle repair)\n";
-        cout << "5. Edit Station (start/stop shop)\n";
-        cout << "6. Save Data\n";
-        cout << "7. Load Data\n";
-        cout << "0. Exit\n";
+        cout << "1.  Add Pipe\n";
+        cout << "2.  Add Compressor Station\n";
+        cout << "3.  View All Objects\n";
+        cout << "4.  Edit Pipe (toggle repair by ID)\n";
+        cout << "5.  Edit Station (start/stop shop by ID)\n";
+        cout << "6.  Save Data to File\n";
+        cout << "7.  Load Data from File\n";
+        cout << "8.  Search Pipes\n";
+        cout << "9.  Search Stations\n";
+        cout << "10. Batch Edit Pipes\n";
+        cout << "0.  Exit\n";
         cout << "Enter your choice: ";
 
-        while (!(cin >> choice)) {
-            cout << "Invalid input!";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            continue;
-        }
-
-        char next = cin.peek();
-        if (next != '\n' && next != ' ' && next != '\t' && next != EOF) {
-            cout << "Invalid input! Only integers 0-7 allowed.\n";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+        int choice = readInt("");
         switch (choice) {
-        case 1: addPipe(pipe); break;
-        case 2: addStation(station); break;
-        case 3: viewAll(pipe, station); break;
-        case 4: editPipe(pipe); break;
-        case 5: editStation(station); break;
-        case 6: saveData(pipe,station); break;
-        case 7: loadData(pipe, station); break;
+        case 1:  manager.addPipe(); break;
+        case 2:  manager.addStation(); break;
+        case 3:
+            cout << "\n--- Pipes ---\n";
+            manager.displayPipes();
+            cout << "\n--- Stations ---\n";
+            manager.displayStations();
+            break;
+        case 4:{
+            int id = readInt("Enter pipe ID: ");
+            bool found = false;
+            cout << "Use 'Search Pipes' or 'Batch Edit' to modify pipes.\n";
+            break;
+        }
+        case 5:{
+            cout << "Use 'Search Stations' to modify stations.\n";
+            break;
+        }
+        case 6: {
+            string filename = readLine("Enter filename to save: ");
+            manager.saveToFile(filename);
+            break;
+        }
+        case 7: {
+            string filename = readLine("Enter filename to load: ");
+            manager.loadFromFile(filename);
+            break;
+        }
+        case 8:  manager.searchPipes(); break;
+        case 9:  manager.searchStations(); break;
+        case 10: manager.batchEditPipes(); break;
         case 0:
             cout << "Exiting program. Goodbye!\n";
+            log("=== Program exited ===");
             return 0;
         default:
-            cout << "Invalid choice! Please select 0-7.\n";
+            cout << "Invalid choice! Please select 0-10.\n";
         }
     }
 
     return 0;
-}
-
-void readLine(string& value) {
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    getline(cin, value);
-}
-
-void addPipe(Pipe& pipe) {
-    if (!pipe.isEmpty()) {
-        cout << "Pipe already exists! Overwrite? (y/n): ";
-        char answer;
-        cin >> answer;
-        if (answer != 'y' && answer != 'Y') {
-            cout << "Operation cancelled.\n";
-            return;
-        }
-    }
-    pipe.inputFromConsole();
-    cout << "Pipe added successfully!\n";
-}
-
-void addStation(CompressorStation& station) {
-    if (!station.isEmpty()) {
-        cout << "Station already exists! Overwrite? (y/n): ";
-        char answer;
-        cin >> answer;
-        if (answer != 'y' && answer != 'Y') {
-            cout << "Operation cancelled.\n";
-            return;
-        }
-    }
-    station.inputFromConsole();
-    cout << "Compressor Station added successfully!\n";
-}
-
-void viewAll(const Pipe& pipe, const CompressorStation& station) {
-    cout << "\n--- Current Objects ---\n";
-    if (!pipe.isEmpty()) {
-        pipe.display();
-    }
-    else {
-        cout << "Pipe: Not created yet.\n";
-    }
-
-    cout << "\n";
-
-    if (!station.isEmpty()) {
-        station.display();
-    }
-    else {
-        cout << "Compressor Station: Not created yet.\n";
-    }
-    cout << "------------------------\n";
-}
-
-void editPipe(Pipe& pipe) {
-    if (pipe.isEmpty()) {
-        cout << "Pipe does not exist! Please add pipe first.\n";
-        return;
-    }
-    pipe.toggleRepair();
-}
-
-void editStation(CompressorStation& station) {
-    if (station.isEmpty()) {
-        cout << "Station does not exist! Please add station first.\n";
-        return;
-    }
-
-    int choice;
-    cout << "Edit Station:\n";
-    cout << "1. Start a shop\n";
-    cout << "2. Stop a shop\n";
-    cout << "Enter choice: ";
-
-    while (!(cin >> choice) || (choice != 1 && choice != 2)) {
-        cout << "Invalid input! Enter 1 or 2: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-
-    if (choice == 1) {
-        station.startShop();
-    }
-    else {
-        station.stopShop();
-    }
-}
-
-void saveData(const Pipe& pipe, const CompressorStation& station) {
-    bool pipeExists = !pipe.isEmpty();
-    bool stationExists = !station.isEmpty();
-
-    if (!pipeExists && !stationExists) {
-        cout << "Nothing to save: both objects are empty!\n";
-        return;
-    }
-
-    cout << "\nWhat do you want to save?\n";
-    if (pipeExists)    cout << "1. Only Pipe\n";
-    if (stationExists) cout << "2. Only Compressor Station\n";
-    if (pipeExists && stationExists) cout << "3. Both objects\n";
-    cout << "Enter choice: ";
-
-    int saveChoice;
-    while (!(cin >> saveChoice) ||
-        (saveChoice == 1 && !pipeExists) ||
-        (saveChoice == 2 && !stationExists) ||
-        (saveChoice == 3 && !(pipeExists && stationExists))) {
-        cout << "Invalid input! Try again: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-
-    string filename;
-    cout << "Enter filename to save (may contain spaces): ";
-    readLine(filename);
-
-    ofstream outFile(filename);
-    if (!outFile) {
-        cout << "Error: Cannot open file for writing!\n";
-        return;
-    }
-
-    switch (saveChoice) {
-    case 1:
-        pipe.saveToFile(outFile);
-        break;
-    case 2:
-        station.saveToFile(outFile);
-        break;
-    case 3:
-        pipe.saveToFile(outFile);
-        station.saveToFile(outFile);
-        break;
-    }
-
-    outFile.close();
-    cout << "Data saved successfully to \"" << filename << "\"\n";
-}
-
-void loadData(Pipe& pipe, CompressorStation& station) {
-    string filename;
-    cout << "Enter filename to load: ";
-    cin >> filename;
-
-    ifstream inFile(filename);
-    if (!inFile) {
-        cout << "Error: Cannot open file for reading!\n";
-        return;
-    }
-
-    Pipe tempPipe;
-    CompressorStation tempStation;
-
-    bool pipeLoaded = false;
-    bool stationLoaded = false;
-
-    string type;
-    while (getline(inFile, type)) {
-        if (type == "Pipe") {
-            tempPipe.loadFromFile(inFile);
-            pipeLoaded = true;
-        }
-        else if (type == "CompressorStation") {
-            tempStation.loadFromFile(inFile);
-            stationLoaded = true;
-        }
-        else if (type.empty()) {
-            continue;
-        }
-        else {
-            cout << "Warning: Unknown record type \"" << type << "\" — skipped.\n";
-        }
-    }
-
-    inFile.close();
-
-    if (!pipeLoaded && !stationLoaded) {
-        cout << "Error: No valid data found in file!\n";
-        return;
-    }
-
-    if (pipeLoaded)    pipe = tempPipe;
-    if (stationLoaded) station = tempStation;
-
-    cout << "Data loaded successfully:\n";
-    if (pipeLoaded)    cout << "  - Pipe\n";
-    if (stationLoaded) cout << "  - Compressor Station\n";
 }
