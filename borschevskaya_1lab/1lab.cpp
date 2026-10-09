@@ -136,6 +136,8 @@ string readLine(const string& prompt) {
 
 class Pipe {
 private:
+    static int nextId;              
+    int id;
     string kilometerMark;   
     double length;         
     int diameter;           
@@ -143,32 +145,34 @@ private:
 
 public:
 
-    Pipe() : length(0.0), diameter(0), isUnderRepair(false) {}
+    Pipe() : id(nextId++), length(0.0), diameter(0), isUnderRepair(false) {}
+
+    Pipe(int existingId, const string& mark, double len, int diam, bool repair)
+        : id(existingId), kilometerMark(mark), length(len), diameter(diam), isUnderRepair(repair) {
+        if (existingId >= nextId) nextId = existingId + 1;
+    }
+
+    int getId() const { return id; }
+    string getMark() const { return kilometerMark; }
+    bool getRepairStatus() const { return isUnderRepair; }
 
     void inputFromConsole() {
-        cout << "Enter kilometer mark (name): ";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(cin, kilometerMark);
-        cout << "Enter length (km): ";
-        while (!(cin >> length) || length <= 0) {
-            cout << "Invalid input! Length must be positive number. Try again: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        kilometerMark = readLine("Enter kilometer mark (name): ");
+        length = readDouble("Enter length (km): ");
+        while (length <= 0) {
+            cout << "Length must be positive!\n";
+            length = readDouble("Enter length (km): ");
         }
-        cout << "Enter diameter (mm): ";
-        while (!(cin >> diameter) || diameter <= 0) {
-            cout << "Invalid input! Diameter must be positive integer. Try again: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        diameter = readInt("Enter diameter (mm): ");
+        while (diameter <= 0) {
+            cout << "Diameter must be positive!\n";
+            diameter = readInt("Enter diameter (mm): ");
         }
-
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
         isUnderRepair = false;
     }
 
     void display() const {
-        cout << "Pipe Info:\n";
+        cout << "  [ID: " << id << "] Pipe\n";
         cout << "  Kilometer mark: " << kilometerMark << "\n";
         cout << "  Length: " << length << " km\n";
         cout << "  Diameter: " << diameter << " mm\n";
@@ -177,29 +181,43 @@ public:
 
     void toggleRepair() {
         isUnderRepair = !isUnderRepair;
-        cout << "Repair status toggled. Now: " << (isUnderRepair ? "Under repair" : "Not under repair") << "\n";
     }
 
-    bool isEmpty() const {
-        return kilometerMark.empty() && length == 0.0 && diameter == 0;
+    void setRepair(bool value) {
+        isUnderRepair = value;
     }
 
     void saveToFile(ofstream& out) const {
         out << "Pipe\n";
+        out << id << "\n";
         out << kilometerMark << "\n";
         out << length << "\n";
         out << diameter << "\n";
         out << isUnderRepair << "\n";
     }
 
-    void loadFromFile(ifstream& in) {
-        getline(in, kilometerMark);
-        in >> length;
-        in >> diameter;
-        in >> isUnderRepair;
-        in.ignore(numeric_limits<streamsize>::max(), '\n');
+    bool loadFromFile(ifstream& in) {
+        string line;
+        if (!getline(in, line)) return false;
+        try { id = stoi(line); }
+        catch (...) { return false; }
+
+        if (!getline(in, kilometerMark)) return false;
+        if (!getline(in, line)) return false;
+        try { length = stod(line); }
+        catch (...) { return false; }
+        if (!getline(in, line)) return false;
+        try { diameter = stoi(line); }
+        catch (...) { return false; }
+        if (!getline(in, line)) return false;
+        isUnderRepair = (line == "1");
+
+        if (id >= nextId) nextId = id + 1;
+        return true;
     }
 };
+
+int Pipe::nextId = 1;
 
 class CompressorStation {
 private:
