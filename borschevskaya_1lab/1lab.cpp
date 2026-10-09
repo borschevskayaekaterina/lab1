@@ -384,14 +384,277 @@ struct StationFilter {
 };
 
 
-void addPipe(Pipe& pipe);
-void addStation(CompressorStation& station);
-void viewAll(const Pipe& pipe, const CompressorStation& station);
-void editPipe(Pipe& pipe);
-void editStation(CompressorStation& station);
-void saveData(const Pipe& pipe, const CompressorStation& station);
-void loadData(Pipe& pipe, CompressorStation& station);
-void readLine(string& value);
+class PipelineManager {
+private:
+    vector<Pipe> pipes;
+    vector<CompressorStation> stations;
+
+public:
+    void addPipe() {
+        Pipe p;
+        p.inputFromConsole();
+        pipes.push_back(p);
+        cout << "Pipe added with ID = " << p.getId() << "\n";
+        log("Added Pipe ID=" + to_string(p.getId()));
+    }
+
+    void displayPipes() const {
+        if (pipes.empty()) {
+            cout << "No pipes.\n";
+            return;
+        }
+        for (const auto& p : pipes) p.display();
+    }
+
+    void addStation() {
+        CompressorStation s;
+        s.inputFromConsole();
+        stations.push_back(s);
+        cout << "Station added with ID = " << s.getId() << "\n";
+        log("Added Station ID=" + to_string(s.getId()));
+    }
+
+    void displayStations() const {
+        if (stations.empty()) {
+            cout << "No stations.\n";
+            return;
+        }
+        for (const auto& s : stations) s.display();
+    }
+
+    vector<int> findPipes(const PipeFilter& filter) const {
+        vector<int> indices;
+        for (size_t i = 0; i < pipes.size(); ++i) {
+            if (filter.matches(pipes[i])) indices.push_back(static_cast<int>(i));
+        }
+        return indices;
+    }
+
+    vector<int> findStations(const StationFilter& filter) const {
+        vector<int> indices;
+        for (size_t i = 0; i < stations.size(); ++i) {
+            if (filter.matches(stations[i])) indices.push_back(static_cast<int>(i));
+        }
+        return indices;
+    }
+
+    void batchEditPipes() {
+        if (pipes.empty()) {
+            cout << "No pipes to edit.\n";
+            return;
+        }
+
+        cout << "\n--- Batch Edit Pipes ---\n";
+        cout << "1. Select ALL pipes\n";
+        cout << "2. Select by filter (mark / repair status)\n";
+        cout << "3. Select by IDs manually\n";
+        int mode = readInt("Choose selection mode: ");
+
+        vector<int> indices;
+
+        if (mode == 1) {
+            for (size_t i = 0; i < pipes.size(); ++i) indices.push_back(static_cast<int>(i));
+        }
+        else if (mode == 2) {
+            cout << "1. By name (substring)\n2. By repair status\n";
+            int sub = readInt("Choose filter: ");
+            if (sub == 1) {
+                string pattern = readLine("Enter substring: ");
+                indices = findPipes(PipeFilter::byMark(pattern));
+            }
+            else if (sub == 2) {
+                int r = readInt("Repair status (0 = no, 1 = yes): ");
+                indices = findPipes(PipeFilter::byRepair(r != 0));
+            }
+            else {
+                cout << "Invalid filter.\n";
+                return;
+            }
+        }
+        else if (mode == 3) {
+            while (true) {
+                int id = readInt("Enter pipe ID (0 to finish): ");
+                if (id == 0) break;
+                bool found = false;
+                for (size_t i = 0; i < pipes.size(); ++i) {
+                    if (pipes[i].getId() == id) {
+                        indices.push_back(static_cast<int>(i));
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) cout << "Pipe with ID " << id << " not found.\n";
+            }
+        }
+        else {
+            cout << "Invalid mode.\n";
+            return;
+        }
+
+        if (indices.empty()) {
+            cout << "No pipes selected.\n";
+            return;
+        }
+
+        cout << "\nSelected " << indices.size() << " pipe(s):\n";
+        for (int idx : indices) pipes[idx].display();
+
+        cout << "\nAction:\n1. Set repair status\n2. Delete\n";
+        int action = readInt("Choose action: ");
+
+        if (action == 1) {
+            int r = readInt("Set repair status (0 = no, 1 = yes): ");
+            for (int idx : indices) pipes[idx].setRepair(r != 0);
+            cout << "Updated " << indices.size() << " pipe(s).\n";
+            log("Batch edit: set repair=" + to_string(r) + " for " +
+                to_string(indices.size()) + " pipes");
+        }
+        else if (action == 2) {
+            vector<int> sorted = indices;
+            sort(sorted.rbegin(), sorted.rend());
+            for (int idx : sorted) {
+                log("Deleted Pipe ID=" + to_string(pipes[idx].getId()));
+                pipes.erase(pipes.begin() + idx);
+            }
+            cout << "Deleted " << indices.size() << " pipe(s).\n";
+        }
+        else {
+            cout << "Invalid action.\n";
+        }
+    }
+
+    void saveToFile(const string& filename) const {
+        ofstream out(filename);
+        if (!out) {
+            cout << "Error: Cannot open file for writing!\n";
+            log("Failed to open file for writing: " + filename);
+            return;
+        }
+        out << "PIPE_COUNT " << pipes.size() << "\n";
+        for (const auto& p : pipes) p.saveToFile(out);
+        out << "STATION_COUNT " << stations.size() << "\n";
+        for (const auto& s : stations) s.saveToFile(out);
+        out.close();
+        cout << "Saved " << pipes.size() << " pipe(s) and "
+            << stations.size() << " station(s) to \"" << filename << "\"\n";
+        log("Saved to file: " + filename);
+    }
+
+    void loadFromFile(const string& filename) {
+        ifstream in(filename);
+        if (!in) {
+            cout << "Error: Cannot open file for reading!\n";
+            log("Failed to open file for reading: " + filename);
+            return;
+        }
+
+        vector<Pipe> tempPipes;
+        vector<CompressorStation> tempStations;
+
+        string line;
+        if (!getline(in, line) || line.substr(0, 11) != "PIPE_COUNT ") {
+            cout << "Error: Invalid file format (expected PIPE_COUNT).\n";
+            return;
+        }
+        int pCount = stoi(line.substr(11));
+
+        for (int i = 0; i < pCount; ++i) {
+            if (!getline(in, line) || line != "Pipe") {
+                cout << "Error: Invalid pipe record.\n";
+                return;
+            }
+            Pipe p;
+            if (!p.loadFromFile(in)) {
+                cout << "Error: Failed to read pipe data.\n";
+                return;
+            }
+            tempPipes.push_back(p);
+        }
+
+        if (!getline(in, line) || line.substr(0, 14) != "STATION_COUNT ") {
+            cout << "Error: Invalid file format (expected STATION_COUNT).\n";
+            return;
+        }
+        int sCount = stoi(line.substr(14));
+
+        for (int i = 0; i < sCount; ++i) {
+            if (!getline(in, line) || line != "CompressorStation") {
+                cout << "Error: Invalid station record.\n";
+                return;
+            }
+            CompressorStation s;
+            if (!s.loadFromFile(in)) {
+                cout << "Error: Failed to read station data.\n";
+                return;
+            }
+            tempStations.push_back(s);
+        }
+
+        in.close();
+
+        pipes = tempPipes;
+        stations = tempStations;
+
+        cout << "Loaded " << pipes.size() << " pipe(s) and "
+            << stations.size() << " station(s) from \"" << filename << "\"\n";
+        log("Loaded from file: " + filename);
+    }
+
+    void searchPipes() {
+        cout << "\nSearch Pipes:\n1. By name (substring)\n2. By repair status\n";
+        int mode = readInt("Choose filter: ");
+        vector<int> found;
+        if (mode == 1) {
+            string pattern = readLine("Enter substring: ");
+            found = findPipes(PipeFilter::byMark(pattern));
+        }
+        else if (mode == 2) {
+            int r = readInt("Repair status (0 = no, 1 = yes): ");
+            found = findPipes(PipeFilter::byRepair(r != 0));
+        }
+        else {
+            cout << "Invalid filter.\n";
+            return;
+        }
+
+        if (found.empty()) {
+            cout << "No pipes found.\n";
+        }
+        else {
+            cout << "Found " << found.size() << " pipe(s):\n";
+            for (int idx : found) pipes[idx].display();
+        }
+        log("Searched pipes, found: " + to_string(found.size()));
+    }
+
+    void searchStations() {
+        cout << "\nSearch Stations:\n1. By name (substring)\n2. By idle percent range\n";
+        int mode = readInt("Choose filter: ");
+        vector<int> found;
+        if (mode == 1) {
+            string pattern = readLine("Enter substring: ");
+            found = findStations(StationFilter::byName(pattern));
+        }
+        else if (mode == 2) {
+            double lo = readDouble("Min idle percent: ");
+            double hi = readDouble("Max idle percent: ");
+            found = findStations(StationFilter::byIdlePercent(lo, hi));
+        }
+        else {
+            cout << "Invalid filter.\n";
+            return;
+        }
+
+        if (found.empty()) {
+            cout << "No stations found.\n";
+        }
+        else {
+            cout << "Found " << found.size() << " station(s):\n";
+            for (int idx : found) stations[idx].display();
+        }
+        log("Searched stations, found: " + to_string(found.size()));
+    }
+};
 
 int main() {
     Pipe pipe;
