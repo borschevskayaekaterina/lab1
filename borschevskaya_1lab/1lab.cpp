@@ -221,6 +221,8 @@ int Pipe::nextId = 1;
 
 class CompressorStation {
 private:
+    static int nextId;
+    int id;
     string name;            
     int totalShops;         
     int activeShops;       
@@ -228,41 +230,49 @@ private:
 
 public:
 
-    CompressorStation() : totalShops(0), activeShops(0), stationClass(0) {}
+    CompressorStation() : id(nextId++), totalShops(0), activeShops(0), stationClass(0) {}
+
+    CompressorStation(int existingId, const string& n, int total, int active, int cls)
+        : id(existingId), name(n), totalShops(total), activeShops(active), stationClass(cls) {
+        if (existingId >= nextId) nextId = existingId + 1;
+    }
+
+    int getId() const { return id; }
+    string getName() const { return name; }
+
+    double getIdlePercent() const {
+        if (totalShops == 0) return 0.0;
+        return (static_cast<double>(totalShops - activeShops) / totalShops) * 100.0;
+    }
 
     void inputFromConsole() {
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Enter station name: ";
-        getline(cin, name);
+        name = readLine("Enter station name: ");
 
-        cout << "Enter total number of shops: ";
-        while (!(cin >> totalShops) || totalShops < 0) {
-            cout << "Invalid input! Must be non-negative integer. Try again: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        totalShops = readInt("Enter total number of shops: ");
+        while (totalShops < 0) {
+            cout << "Must be non-negative!\n";
+            totalShops = readInt("Enter total number of shops: ");
         }
 
-        cout << "Enter number of active shops: ";
-        while (!(cin >> activeShops) || activeShops < 0 || activeShops > totalShops) {
-            cout << "Invalid input! Must be between 0 and " << totalShops << ". Try again: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        activeShops = readInt("Enter number of active shops: ");
+        while (activeShops < 0 || activeShops > totalShops) {
+            cout << "Must be between 0 and " << totalShops << "!\n";
+            activeShops = readInt("Enter number of active shops: ");
         }
 
-        cout << "Enter station class (integer): ";
-        while (!(cin >> stationClass) || stationClass < 0) {
-            cout << "Invalid input! Must be non-negative integer. Try again: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        stationClass = readInt("Enter station class: ");
+        while (stationClass < 0) {
+            cout << "Must be non-negative!\n";
+            stationClass = readInt("Enter station class: ");
         }
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
     void display() const {
-        cout << "Compressor Station Info:\n";
+        cout << "  [ID: " << id << "] Compressor Station\n";
         cout << "  Name: " << name << "\n";
         cout << "  Total shops: " << totalShops << "\n";
         cout << "  Active shops: " << activeShops << "\n";
+        cout << "  Idle percent: " << fixed << setprecision(1)<< getIdlePercent() << "%\n";
         cout << "  Station class: " << stationClass << "\n";
     }
 
@@ -286,12 +296,9 @@ public:
         }
     }
 
-    bool isEmpty() const {
-        return name.empty() && totalShops == 0 && activeShops == 0 && stationClass == 0;
-    }
-
     void saveToFile(ofstream& out) const {
         out << "CompressorStation\n";
+        out << id << "\n";
         out << name << "\n";
         out << totalShops << "\n";
         out << activeShops << "\n";
@@ -299,15 +306,30 @@ public:
     }
 
 
-    void loadFromFile(ifstream& in) {
-        getline(in, name);
-        in >> totalShops;
-        in >> activeShops;
-        in >> stationClass;
-        in.ignore(numeric_limits<streamsize>::max(), '\n');
+    bool loadFromFile(ifstream& in) {
+        string line;
+        if (!getline(in, line)) return false;
+        try { id = stoi(line); }
+        catch (...) { return false; }
+
+        if (!getline(in, name)) return false;
+        if (!getline(in, line)) return false;
+        try { totalShops = stoi(line); }
+        catch (...) { return false; }
+        if (!getline(in, line)) return false;
+        try { activeShops = stoi(line); }
+        catch (...) { return false; }
+        if (!getline(in, line)) return false;
+        try { stationClass = stoi(line); }
+        catch (...) { return false; }
+
+        if (id >= nextId) nextId = id + 1;
+        return true;
     }
 
 };
+
+int CompressorStation::nextId = 1;
 
 void addPipe(Pipe& pipe);
 void addStation(CompressorStation& station);
