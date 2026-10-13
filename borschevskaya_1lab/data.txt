@@ -1,5 +1,0 @@
-CompressorStation
-station 1
-10
-0
-23

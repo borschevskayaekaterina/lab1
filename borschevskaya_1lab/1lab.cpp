@@ -6,50 +6,14 @@
 #include <cctype>
 #include <ctime>
 #include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
-class Logger {
-private:
-    ofstream logFile;
-
-    string currentTime() const {
-        time_t now = time(nullptr);
-        tm localTm;
-#ifdef _WIN32
-        localtime_s(&localTm, &now);
-#else
-        localtime_r(&now, &localTm);
-#endif
-        char buf[32];
-        strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &localTm);
-        return string(buf);
-    }
-
-public:
-    Logger(const string& filename) {
-        logFile.open(filename, ios::app);
-        if (!logFile) {
-            cerr << "Warning: Cannot open log file '" << filename << "'\n";
-        }
-    }
-
-    void log(const string& message) {
-        if (logFile) {
-            logFile << "[" << currentTime() << "] " << message << "\n";
-            logFile.flush();
-        }
-    }
-
-    ~Logger() {
-        if (logFile) logFile.close();
-    }
-};
-
-Logger* g_logger = nullptr;
+ofstream logFile("pipeline.log");
 
 void log(const string& msg) {
-    if (g_logger) g_logger->log(msg);
+    if (logFile) logFile << msg << "\n";
 }
 
 bool isAllDigits(const string& s) {
@@ -75,7 +39,7 @@ int readInt(const string& prompt) {
         line = line.substr(start, end - start + 1);
 
         if (!isAllDigits(line)) {
-            cout << "Invalid input! Enter a valid integer.\n";
+            cout << "Invalid input! \"" << line << "\" is not a valid integer.\n";
             log("Invalid int input: \"" + line + "\"");
             continue;
         }
@@ -84,7 +48,7 @@ int readInt(const string& prompt) {
             return stoi(line);
         }
         catch (...) {
-            cout << "Invalid input! Number too large.\n";
+            cout << "Invalid input! Number is too large.\n";
         }
     }
 }
@@ -103,7 +67,9 @@ double readDouble(const string& prompt) {
         }
         line = line.substr(start, end - start + 1);
 
-        bool hasDigit = false, hasDot = false, ok = true;
+        bool hasDigit = false;
+        bool hasDot = false;
+        bool ok = true;
         for (char c : line) {
             if (isdigit(static_cast<unsigned char>(c))) hasDigit = true;
             else if (c == '.') {
@@ -112,8 +78,9 @@ double readDouble(const string& prompt) {
             }
             else { ok = false; break; }
         }
+
         if (!ok || !hasDigit) {
-            cout << "Invalid input! Enter a valid number.\n";
+            cout << "Invalid input! \"" << line << "\" is not a valid number.\n";
             log("Invalid double input: \"" + line + "\"");
             continue;
         }
@@ -126,12 +93,11 @@ double readDouble(const string& prompt) {
         }
     }
 }
-
 string readLine(const string& prompt) {
-    string line;
+    string value;
     cout << prompt;
-    getline(cin, line);
-    return line;
+    getline(cin, value);
+    return value;
 }
 
 class Pipe {
@@ -445,7 +411,7 @@ public:
         }
 
         cout << "\n--- Batch Edit Pipes ---\n";
-        cout << "1. Select ALL pipes\n";
+        cout << "1. Select All pipes\n";
         cout << "2. Select by filter (mark / repair status)\n";
         cout << "3. Select by IDs manually\n";
         int mode = readInt("Choose selection mode: ");
@@ -530,13 +496,12 @@ public:
             log("Failed to open file for writing: " + filename);
             return;
         }
-        out << "PIPE_COUNT " << pipes.size() << "\n";
+        out << "Pipe_count " << pipes.size() << "\n";
         for (const auto& p : pipes) p.saveToFile(out);
-        out << "STATION_COUNT " << stations.size() << "\n";
+        out << "Station_count " << stations.size() << "\n";
         for (const auto& s : stations) s.saveToFile(out);
         out.close();
-        cout << "Saved " << pipes.size() << " pipe(s) and "
-            << stations.size() << " station(s) to \"" << filename << "\"\n";
+        cout << "Saved " << pipes.size() << " pipe(s) and " << stations.size() << " station(s) to \"" << filename << "\"\n";
         log("Saved to file: " + filename);
     }
 
@@ -552,8 +517,8 @@ public:
         vector<CompressorStation> tempStations;
 
         string line;
-        if (!getline(in, line) || line.substr(0, 11) != "PIPE_COUNT ") {
-            cout << "Error: Invalid file format (expected PIPE_COUNT).\n";
+        if (!getline(in, line) || line.substr(0, 11) != "Pipe_count ") {
+            cout << "Error: Invalid file format (expected Pipe_count).\n";
             return;
         }
         int pCount = stoi(line.substr(11));
@@ -571,8 +536,8 @@ public:
             tempPipes.push_back(p);
         }
 
-        if (!getline(in, line) || line.substr(0, 14) != "STATION_COUNT ") {
-            cout << "Error: Invalid file format (expected STATION_COUNT).\n";
+        if (!getline(in, line) || line.substr(0, 14) != "Station_count ") {
+            cout << "Error: Invalid file format (expected Station_count).\n";
             return;
         }
         int sCount = stoi(line.substr(14));

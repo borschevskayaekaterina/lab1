@@ -1,0 +1,14 @@
+PIPE_COUNT 2
+Pipe
+1
+Moscow-Novorossiysk
+250
+1250
+1
+Pipe
+2
+Yakutia
+562
+1614
+1
+STATION_COUNT 0
