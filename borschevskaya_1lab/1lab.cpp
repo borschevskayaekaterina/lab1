@@ -101,93 +101,43 @@ string readLine(const string& prompt) {
 }
 
 class Pipe {
-private:
-    static int nextId;              
+public:
     int id;
-    string kilometerMark;   
+    string name;   
     double length;         
     int diameter;           
     bool isUnderRepair;    
 
-public:
+    Pipe() : id(0), length(0.0), diameter(0), isUnderRepair(false) {}
 
-    Pipe() : id(nextId++), length(0.0), diameter(0), isUnderRepair(false) {}
+    void input() {
+        name = readLine("Name: ");
 
-    Pipe(int existingId, const string& mark, double len, int diam, bool repair)
-        : id(existingId), kilometerMark(mark), length(len), diameter(diam), isUnderRepair(repair) {
-        if (existingId >= nextId) nextId = existingId + 1;
-    }
-
-    int getId() const { return id; }
-    string getMark() const { return kilometerMark; }
-    bool getRepairStatus() const { return isUnderRepair; }
-
-    void inputFromConsole() {
-        kilometerMark = readLine("Enter kilometer mark (name): ");
-        length = readDouble("Enter length (km): ");
+        length = readDouble("Length (km): ");
         while (length <= 0) {
             cout << "Length must be positive!\n";
-            length = readDouble("Enter length (km): ");
+            length = readDouble("Length (km): ");
         }
-        diameter = readInt("Enter diameter (mm): ");
+
+        diameter = readInt("Diameter (mm): ");
         while (diameter <= 0) {
             cout << "Diameter must be positive!\n";
-            diameter = readInt("Enter diameter (mm): ");
+            diameter = readInt("Diameter (mm): ");
         }
+
         isUnderRepair = false;
     }
 
     void display() const {
-        cout << "  [ID: " << id << "] Pipe\n";
-        cout << "  Kilometer mark: " << kilometerMark << "\n";
-        cout << "  Length: " << length << " km\n";
-        cout << "  Diameter: " << diameter << " mm\n";
-        cout << "  Under repair: " << (isUnderRepair ? "Yes" : "No") << "\n";
-    }
-
-    void toggleRepair() {
-        isUnderRepair = !isUnderRepair;
-    }
-
-    void setRepair(bool value) {
-        isUnderRepair = value;
-    }
-
-    void saveToFile(ofstream& out) const {
-        out << "Pipe\n";
-        out << id << "\n";
-        out << kilometerMark << "\n";
-        out << length << "\n";
-        out << diameter << "\n";
-        out << isUnderRepair << "\n";
-    }
-
-    bool loadFromFile(ifstream& in) {
-        string line;
-        if (!getline(in, line)) return false;
-        try { id = stoi(line); }
-        catch (...) { return false; }
-
-        if (!getline(in, kilometerMark)) return false;
-        if (!getline(in, line)) return false;
-        try { length = stod(line); }
-        catch (...) { return false; }
-        if (!getline(in, line)) return false;
-        try { diameter = stoi(line); }
-        catch (...) { return false; }
-        if (!getline(in, line)) return false;
-        isUnderRepair = (line == "1");
-
-        if (id >= nextId) nextId = id + 1;
-        return true;
+        cout << "[ID " << id << "] " << name
+            << " | " << length << " km"
+            << " | " << diameter << " mm"
+            << " | Repair: " << (isUnderRepair ? "Yes" : "No") << "\n";
     }
 };
 
-int Pipe::nextId = 1;
-
 class CompressorStation {
-private:
-    static int nextId;
+public:
     int id;
     string name;            
     int totalShops;         
@@ -196,159 +146,42 @@ private:
 
 public:
 
-    CompressorStation() : id(nextId++), totalShops(0), activeShops(0), stationClass(0) {}
+    CompressorStation() : id(0), totalShops(0), activeShops(0), stationClass(0) {}
 
-    CompressorStation(int existingId, const string& n, int total, int active, int cls)
-        : id(existingId), name(n), totalShops(total), activeShops(active), stationClass(cls) {
-        if (existingId >= nextId) nextId = existingId + 1;
-    }
+    void input() {
+        name = readLine("Name: ");
 
-    int getId() const { return id; }
-    string getName() const { return name; }
-
-    double getIdlePercent() const {
-        if (totalShops == 0) return 0.0;
-        return (static_cast<double>(totalShops - activeShops) / totalShops) * 100.0;
-    }
-
-    void inputFromConsole() {
-        name = readLine("Enter station name: ");
-
-        totalShops = readInt("Enter total number of shops: ");
+        totalShops = readInt("Total shops: ");
         while (totalShops < 0) {
-            cout << "Must be non-negative!\n";
-            totalShops = readInt("Enter total number of shops: ");
+            cout << "Total shops must be non-negative!\n";
+            totalShops = readInt("Total shops: ");
         }
 
-        activeShops = readInt("Enter number of active shops: ");
+        activeShops = readInt("Active shops: ");
         while (activeShops < 0 || activeShops > totalShops) {
-            cout << "Must be between 0 and " << totalShops << "!\n";
-            activeShops = readInt("Enter number of active shops: ");
+            cout << "Active shops must be between 0 and " << totalShops << "!\n";
+            activeShops = readInt("Active shops: ");
         }
 
-        stationClass = readInt("Enter station class: ");
+        stationClass = readInt("Station class: ");
         while (stationClass < 0) {
-            cout << "Must be non-negative!\n";
-            stationClass = readInt("Enter station class: ");
+            cout << "Station class must be non-negative!\n";
+            stationClass = readInt("Station class: ");
         }
+    }
+
+    double idlePercent() const {
+        if (totalShops == 0) return 0;
+        return 100.0 * (totalShops - activeShops) / totalShops;
     }
 
     void display() const {
-        cout << "  [ID: " << id << "] Compressor Station\n";
-        cout << "  Name: " << name << "\n";
-        cout << "  Total shops: " << totalShops << "\n";
-        cout << "  Active shops: " << activeShops << "\n";
-        cout << "  Idle percent: " << fixed << setprecision(1)<< getIdlePercent() << "%\n";
-        cout << "  Station class: " << stationClass << "\n";
-    }
-
-    void startShop() {
-        if (activeShops < totalShops) {
-            activeShops++;
-            cout << "Shop started. Active shops now: " << activeShops << "\n";
-        }
-        else {
-            cout << "Cannot start shop: all shops are already active!\n";
-        }
-    }
-
-    void stopShop() {
-        if (activeShops > 0) {
-            activeShops--;
-            cout << "Shop stopped. Active shops now: " << activeShops << "\n";
-        }
-        else {
-            cout << "Cannot stop shop: no active shops!\n";
-        }
-    }
-
-    void saveToFile(ofstream& out) const {
-        out << "CompressorStation\n";
-        out << id << "\n";
-        out << name << "\n";
-        out << totalShops << "\n";
-        out << activeShops << "\n";
-        out << stationClass << "\n";
-    }
-
-
-    bool loadFromFile(ifstream& in) {
-        string line;
-        if (!getline(in, line)) return false;
-        try { id = stoi(line); }
-        catch (...) { return false; }
-
-        if (!getline(in, name)) return false;
-        if (!getline(in, line)) return false;
-        try { totalShops = stoi(line); }
-        catch (...) { return false; }
-        if (!getline(in, line)) return false;
-        try { activeShops = stoi(line); }
-        catch (...) { return false; }
-        if (!getline(in, line)) return false;
-        try { stationClass = stoi(line); }
-        catch (...) { return false; }
-
-        if (id >= nextId) nextId = id + 1;
-        return true;
-    }
-
-};
-
-int CompressorStation::nextId = 1;
-
-struct PipeFilter {
-    enum Type { NONE, BY_MARK, BY_REPAIR } type;
-    string markPattern;
-    bool repairValue;
-
-    PipeFilter() : type(NONE), repairValue(false) {}
-
-    static PipeFilter byMark(const string& pattern) {
-        PipeFilter f; f.type = BY_MARK; f.markPattern = pattern; return f;
-    }
-    static PipeFilter byRepair(bool value) {
-        PipeFilter f; f.type = BY_REPAIR; f.repairValue = value; return f;
-    }
-
-    bool matches(const Pipe& p) const {
-        switch (type) {
-        case BY_MARK:   return p.getMark().find(markPattern) != string::npos;
-        case BY_REPAIR: return p.getRepairStatus() == repairValue;
-        default:        return true;
-        }
+        cout << "[ID " << id << "] " << name
+            << " | Shops: " << activeShops << "/" << totalShops
+            << " | Idle: " << idlePercent() << "%"
+            << " | Class: " << stationClass << "\n";
     }
 };
-
-struct StationFilter {
-    enum Type { NONE, BY_NAME, BY_IDLE_PERCENT } type;
-    string namePattern;
-    double idlePercentMin;
-    double idlePercentMax;
-
-    StationFilter() : type(NONE), idlePercentMin(0), idlePercentMax(100) {}
-
-    static StationFilter byName(const string& pattern) {
-        StationFilter f; f.type = BY_NAME; f.namePattern = pattern; return f;
-    }
-    static StationFilter byIdlePercent(double minP, double maxP) {
-        StationFilter f; f.type = BY_IDLE_PERCENT;
-        f.idlePercentMin = minP; f.idlePercentMax = maxP; return f;
-    }
-
-    bool matches(const CompressorStation& s) const {
-        switch (type) {
-        case BY_NAME:
-            return s.getName().find(namePattern) != string::npos;
-        case BY_IDLE_PERCENT: {
-            double p = s.getIdlePercent();
-            return p >= idlePercentMin && p <= idlePercentMax;
-        }
-        default: return true;
-        }
-    }
-};
-
 
 class PipelineManager {
 private:
