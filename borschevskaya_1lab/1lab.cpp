@@ -420,68 +420,45 @@ public:
     }
 };
 int main() {
-    Logger logger("pipeline.log");
-    g_logger = &logger;
-    log("=== Program started ===");
-
     PipelineManager manager;
 
     while (true) {
-        cout << "\n===== Pipeline Management System =====\n";
-        cout << "1.  Add Pipe\n";
-        cout << "2.  Add Compressor Station\n";
-        cout << "3.  View All Objects\n";
-        cout << "4.  Edit Pipe (toggle repair by ID)\n";
-        cout << "5.  Edit Station (start/stop shop by ID)\n";
-        cout << "6.  Save Data to File\n";
-        cout << "7.  Load Data from File\n";
-        cout << "8.  Search Pipes\n";
-        cout << "9.  Search Stations\n";
-        cout << "10. Batch Edit Pipes\n";
-        cout << "0.  Exit\n";
-        cout << "Enter your choice: ";
+        cout << "\n===== MENU =====\n";
+        cout << "1. Add Pipe\n";
+        cout << "2. Add Station\n";
+        cout << "3. View All\n";
+        cout << "4. Search Pipes\n";
+        cout << "5. Search Stations\n";
+        cout << "6. Batch Edit Pipes\n";
+        cout << "7. Save\n";
+        cout << "8. Load\n";
+        cout << "0. Exit\n";
 
-        int choice = readInt("");
+        int choice = readInt("Choice: ");
+
         switch (choice) {
-        case 1:  manager.addPipe(); break;
-        case 2:  manager.addStation(); break;
-        case 3:
-            cout << "\n--- Pipes ---\n";
-            manager.displayPipes();
-            cout << "\n--- Stations ---\n";
-            manager.displayStations();
-            break;
-        case 4:{
-            int id = readInt("Enter pipe ID: ");
-            bool found = false;
-            cout << "Use 'Search Pipes' or 'Batch Edit' to modify pipes.\n";
-            break;
-        }
-        case 5:{
-            cout << "Use 'Search Stations' to modify stations.\n";
-            break;
-        }
-        case 6: {
-            string filename = readLine("Enter filename to save: ");
-            manager.saveToFile(filename);
-            break;
-        }
+        case 1: manager.addPipe(); break;
+        case 2: manager.addStation(); break;
+        case 3: manager.viewAll(); break;
+        case 4: manager.searchPipes(); break;
+        case 5: manager.searchStations(); break;
+        case 6: manager.batchEditPipes(); break;
         case 7: {
-            string filename = readLine("Enter filename to load: ");
-            manager.loadFromFile(filename);
+            string filename = readLine("Filename: ");
+            manager.save(filename);
             break;
         }
-        case 8:  manager.searchPipes(); break;
-        case 9:  manager.searchStations(); break;
-        case 10: manager.batchEditPipes(); break;
+        case 8: {
+            string filename = readLine("Filename: ");
+            manager.load(filename);
+            break;
+        }
         case 0:
-            cout << "Exiting program. Goodbye!\n";
-            log("=== Program exited ===");
+            cout << "Bye!\n";
+            log("Exit");
             return 0;
         default:
-            cout << "Invalid choice! Please select 0-10.\n";
+            cout << "Invalid choice.\n";
         }
     }
-
-    return 0;
 }
