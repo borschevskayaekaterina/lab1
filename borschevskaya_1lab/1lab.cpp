@@ -129,10 +129,7 @@ public:
     }
 
     void display() const {
-        cout << "[ID " << id << "] " << name
-            << " | " << length << " km"
-            << " | " << diameter << " mm"
-            << " | Repair: " << (isUnderRepair ? "Yes" : "No") << "\n";
+        cout << "[ID " << id << "] " << name << " | " << length << " km"<< " | " << diameter << " mm" << " | Repair: " << (isUnderRepair ? "Yes" : "No") << "\n";
     }
 };
 
@@ -176,10 +173,7 @@ public:
     }
 
     void display() const {
-        cout << "[ID " << id << "] " << name
-            << " | Shops: " << activeShops << "/" << totalShops
-            << " | Idle: " << idlePercent() << "%"
-            << " | Class: " << stationClass << "\n";
+        cout << "[ID " << id << "] " << name << " | Shops: " << activeShops << "/" << totalShops << " | Idle: " << idlePercent() << "%" << " | Class: " << stationClass << "\n";
     }
 };
 
@@ -344,21 +338,16 @@ public:
 
         out << pipes.size() << "\n";
         for (const auto& p : pipes) {
-            out << p.id << "\n" << p.name << "\n"
-                << p.length << "\n" << p.diameter << "\n"
-                << p.isUnderRepair << "\n";
+            out << p.id << "\n" << p.name << "\n" << p.length << "\n" << p.diameter << "\n" << p.isUnderRepair << "\n";
         }
 
         out << stations.size() << "\n";
         for (const auto& s : stations) {
-            out << s.id << "\n" << s.name << "\n"
-                << s.totalShops << "\n" << s.activeShops << "\n"
-                << s.stationClass << "\n";
+            out << s.id << "\n" << s.name << "\n" << s.totalShops << "\n" << s.activeShops << "\n" << s.stationClass << "\n";
         }
 
         out.close();
-        cout << "Saved " << pipes.size() << " pipes, "
-            << stations.size() << " stations to " << filename << "\n";
+        cout << "Saved " << pipes.size() << " pipes, " << stations.size() << " stations to " << filename << "\n";
         log("Saved: " + filename);
     }
 
@@ -414,8 +403,7 @@ public:
         pipes = newPipes;
         stations = newStations;
 
-        cout << "Loaded " << pipes.size() << " pipes, "
-            << stations.size() << " stations from " << filename << "\n";
+        cout << "Loaded " << pipes.size() << " pipes, " << stations.size() << " stations from " << filename << "\n";
         log("Loaded: " + filename);
     }
 };
@@ -454,7 +442,7 @@ int main() {
             break;
         }
         case 0:
-            cout << "Bye!\n";
+            cout << "Goodbye!\n";
             log("Exit");
             return 0;
         default:
