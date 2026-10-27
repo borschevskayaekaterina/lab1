@@ -144,6 +144,7 @@
     <ClCompile Include="Class_Manager.cpp" />
     <ClCompile Include="Class_Pipe.cpp" />
     <ClCompile Include="Class_Utils.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class_CompressorStation.h" />
