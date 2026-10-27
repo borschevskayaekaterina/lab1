@@ -24,12 +24,18 @@
     <ClCompile Include="Class_Utils.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Class_CompressorStation.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class_Pipe.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Class_Utils.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Class_CompressorStation.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
