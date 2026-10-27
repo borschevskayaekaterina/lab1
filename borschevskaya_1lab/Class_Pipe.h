@@ -1,5 +1,34 @@
 #pragma once
-class Class_Pipe
-{
-};
+#include <iostream>
+#include <string>
+#include <fstream>
 
+class Pipe {
+private:
+    static int nextId;
+    int id;
+    std::string name;
+    double length;
+    double diameter;
+    bool repairing;
+
+    void updateNextId();
+
+public:
+    Pipe();
+
+    int getId() const;
+    std::string getName() const;
+    bool isRepairing() const;
+    void setRepairing(bool newRepairing);
+
+    void input();
+    void print() const;
+    void inTheRepair();
+
+    void saveToFile(std::ofstream& file) const;
+    bool loadFromFile(std::ifstream& file);
+
+    bool matchesName(const std::string& query) const;
+    bool matchesRepair(bool repairState) const;
+};
