@@ -141,11 +141,13 @@
   <ItemGroup>
     <ClCompile Include="1lab.cpp" />
     <ClCompile Include="Class_CompressorStation.cpp" />
+    <ClCompile Include="Class_Manager.cpp" />
     <ClCompile Include="Class_Pipe.cpp" />
     <ClCompile Include="Class_Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class_CompressorStation.h" />
+    <ClInclude Include="Class_Manager.h" />
     <ClInclude Include="Class_Pipe.h" />
     <ClInclude Include="Class_Utils.h" />
   </ItemGroup>
