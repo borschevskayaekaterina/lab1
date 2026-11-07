@@ -17,47 +17,52 @@ int CompressorStation::getId() const { return id; }
 string CompressorStation::getName() const { return name; }
 
 void CompressorStation::input() {
-    cout << "Р’РІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёРµ РљРЎ: ";
+    cout << "Введите название КС: ";
     getline(cin, name);
 
-    numberOfWorkshops = readInt("РљРѕР»РёС‡РµСЃС‚РІРѕ С†РµС…РѕРІ: ");
+    numberOfWorkshops = readInt("Общее количество цехов: ");
     while (numberOfWorkshops <= 0) {
-        cout << "РћС€РёР±РєР°! РљРѕР»РёС‡РµСЃС‚РІРѕ С†РµС…РѕРІ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рј.\n";
-        numberOfWorkshops = readInt("РљРѕР»РёС‡РµСЃС‚РІРѕ С†РµС…РѕРІ: ");
+        cout << "Ошибка! Количество цехов должно быть положительным.\n";
+        numberOfWorkshops = readInt("Общее количество цехов: ");
     }
 
-    operatingWorkshops = 0;
+    operatingWorkshops = readInt("Сколько цехов работает сейчас: ");
+    while (operatingWorkshops < 0 || operatingWorkshops > numberOfWorkshops) {
+        cout << "Ошибка! Работающих цехов не может быть больше общего (от 0 до " << numberOfWorkshops << ").\n";
+        operatingWorkshops = readInt("Сколько цехов работает сейчас: ");
+    }
 
-    stationClass = readInt("РљР»Р°СЃСЃ СЃС‚Р°РЅС†РёРё: ");
+    stationClass = readInt("Класс станции: ");
     while (stationClass <= 0) {
-        cout << "РћС€РёР±РєР°! РљР»Р°СЃСЃ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рј.\n";
-        stationClass = readInt("РљР»Р°СЃСЃ СЃС‚Р°РЅС†РёРё: ");
+        cout << "Ошибка! Класс должен быть положительным.\n";
+        stationClass = readInt("Класс станции: ");
     }
 }
 
 void CompressorStation::print() const {
-    cout << "\nРљРЎ СЃ ID: " << id << "\n"
-        << "РќР°Р·РІР°РЅРёРµ: " << name << "\n"
-        << "РљРѕР»РёС‡РµСЃС‚РІРѕ С†РµС…РѕРІ: " << numberOfWorkshops << "\n"
-        << "РљРѕР»РёС‡РµСЃС‚РІРѕ СЂР°Р±РѕС‚Р°СЋС‰РёС… С†РµС…РѕРІ: " << operatingWorkshops << "\n"
-        << "РљР»Р°СЃСЃ СЃС‚Р°РЅС†РёРё: " << stationClass << "\n"
-        << "РЎС‚Р°РЅС†РёСЏ " << (operatingWorkshops > 0 ? "Р Р°Р±РѕС‚Р°РµС‚" : "РџСЂРѕСЃС‚Р°РёРІР°РµС‚") << "\n";
+    cout << "\nКС с ID: " << id << "\n"
+        << "Название: " << name << "\n"
+        << "Количество цехов: " << numberOfWorkshops << "\n"
+        << "Количество работающих цехов: " << operatingWorkshops << "\n"
+        << "Процент незадействованных (простой): " << getIdlePercent() << "%\n"
+        << "Класс станции: " << stationClass << "\n"
+        << "Станция " << (operatingWorkshops > 0 ? "Работает" : "Простаивает") << "\n";
 }
 
 void CompressorStation::startWorkshop() {
     if (operatingWorkshops < numberOfWorkshops) {
         operatingWorkshops++;
-        cout << "Р¦РµС… Р·Р°РїСѓС‰РµРЅ.\n";
+        cout << "Цех запущен.\n";
     }
-    else cout << "РќРµР»СЊР·СЏ, РІСЃРµ С†РµС…Р° РІ СЂР°Р±РѕС‚Рµ\n";
+    else cout << "Нельзя, все цеха в работе\n";
 }
 
 void CompressorStation::stopWorkshop() {
     if (operatingWorkshops > 0) {
         operatingWorkshops--;
-        cout << "Р¦РµС… РѕСЃС‚Р°РЅРѕРІР»РµРЅ.\n";
+        cout << "Цех остановлен.\n";
     }
-    else cout << "РќРµР»СЊР·СЏ, РЅРµС‚ СЂР°Р±РѕС‚Р°СЋС‰РёС… С†РµС…РѕРІ\n";
+    else cout << "Нельзя, нет работающих цехов\n";
 }
 
 void CompressorStation::saveToFile(ofstream& file) const {

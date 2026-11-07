@@ -1,10 +1,11 @@
 #include <iostream>
 #include <clocale>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <chrono>
 #include <ctime>
+#include <windows.h>
 #include "Pipe.h"
 #include "CompressorStation.h"
 #include "Utils.h"
@@ -15,10 +16,14 @@ using namespace std;
 int main()
 {
     setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
 
     time_t now = time(nullptr);
     char buf[80];
-    strftime(buf, sizeof(buf), "log_%Y-%m-%d_%H-%M-%S.txt", localtime(&now));
+    struct tm timeinfo;
+    localtime_s(&timeinfo, &now);
+    strftime(buf, sizeof(buf), "log_%Y-%m-%d_%H-%M-%S.txt", &timeinfo);
     string logFilename = buf;
 
     ofstream logfile(logFilename, ios::app);
@@ -28,45 +33,45 @@ int main()
         cerr_out.redirect(logfile);
     }
 
-    cerr << "=== Ð—ÐÐŸÐ£Ð¡Ðš ÐŸÐ ÐžÐ“Ð ÐÐœÐœÐ« ===\n";
+    cerr << "=== Çàïóñê ïðîãðàììû ===\n";
 
-    map<int, Pipe> pipe;
-    map<int, CompressorStation> compressorStation;
+    unordered_map<int, Pipe> pipe;
+    unordered_map<int, CompressorStation> compressorStation;
 
     while (true) {
-        cout << "\nÐœÐ•ÐÐ®\n"
-            << "1. Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ñ‚Ñ€ÑƒÐ±Ñƒ\n"
-            << "2. Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐšÐ¡\n"
-            << "3. ÐŸÑ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€ Ð²ÑÐµÑ… Ð¾Ð±ÑŠÐµÐºÑ‚Ð¾Ð²\n"
-            << "4. ÐŸÐ°ÐºÐµÑ‚Ð½Ñ‹Ð¹ Ð¿Ð¾Ð¸ÑÐº Ð¸ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð¾Ð±ÑŠÐµÐºÑ‚Ð°Ð¼Ð¸\n"
-            << "5. Ð—Ð°Ð¿ÑƒÑÐº/Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ñ†ÐµÑ…Ð° Ð½Ð° ÐºÐ¾Ð½ÐºÑ€ÐµÑ‚Ð½Ð¾Ð¹ ÐšÐ¡\n"
-            << "6. Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ Ð² Ñ„Ð°Ð¹Ð»\n"
-            << "7. Ð—Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð°\n"
-            << "0. Ð’Ñ‹Ñ…Ð¾Ð´\n\n";
+        cout << "\nÌåíþ\n"
+            << "1. Äîáàâèòü òðóáó\n"
+            << "2. Äîáàâèòü ÊÑ\n"
+            << "3. Ïðîñìîòð âñåõ îáúåêòîâ\n"
+            << "4. Ïàêåòíûé ïîèñê è óïðàâëåíèå îáúåêòàìè\n"
+            << "5. Çàïóñê/îñòàíîâêà öåõà íà êîíêðåòíîé ÊÑ\n"
+            << "6. Ñîõðàíèòü â ôàéë\n"
+            << "7. Çàãðóçèòü èç ôàéëà\n"
+            << "0. Âûõîä\n\n";
 
-        int choice = readInt("Ð’Ð°Ñˆ Ð²Ñ‹Ð±Ð¾Ñ€: ");
-        cerr << "Ð’Ñ‹Ð±Ñ€Ð°Ð½ Ð¿ÑƒÐ½ÐºÑ‚ Ð¼ÐµÐ½ÑŽ: " << choice << "\n";
+        int choice = readInt("Âàø âûáîð: ");
+        cerr << "Âûáðàí ïóíêò ìåíþ: " << choice << "\n";
 
         switch (choice) {
         case 1: {
             Pipe newPipe;
             newPipe.input();
             pipe.emplace(newPipe.getId(), newPipe);
-            cout << "Ð¢Ñ€ÑƒÐ±Ð° Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð° (ID " << newPipe.getId() << ")\n";
-            cerr << "Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð° Ñ‚Ñ€ÑƒÐ±Ð° ID: " << newPipe.getId() << "\n";
+            cout << "Òðóáà äîáàâëåíà (ID " << newPipe.getId() << ")\n";
+            cerr << "Äîáàâëåíà òðóáà ID: " << newPipe.getId() << "\n";
             break;
         }
         case 2: {
             CompressorStation newCs;
             newCs.input();
             compressorStation.emplace(newCs.getId(), newCs);
-            cout << "ÐšÐ¡ Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð° (ID " << newCs.getId() << ")\n";
-            cerr << "Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð° ÐšÐ¡ ID: " << newCs.getId() << "\n";
+            cout << "ÊÑ äîáàâëåíà (ID " << newCs.getId() << ")\n";
+            cerr << "Äîáàâëåíà ÊÑ ID: " << newCs.getId() << "\n";
             break;
         }
         case 3: {
             if (pipe.empty() && compressorStation.empty()) {
-                cout << "ÐŸÐ¾ÐºÐ° Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð²Ð²ÐµÐ´ÐµÐ½Ð¾\n";
+                cout << "Ïîêà íè÷åãî íå ââåäåíî\n";
             }
             else {
                 for (const auto& pair : pipe) pair.second.print();
@@ -75,14 +80,14 @@ int main()
             break;
         }
         case 4: {
-            int type = readInt("Ð¡ Ñ‡ÐµÐ¼ Ñ€Ð°Ð±Ð¾Ñ‚Ð°ÐµÐ¼? (1 - Ð¢Ñ€ÑƒÐ±Ñ‹, 2 - ÐšÐ¡): ");
+            int type = readInt("Ñ ÷åì ðàáîòàåì? (1 - Òðóáû, 2 - ÊÑ): ");
             if (type == 1) {
                 managePipes(pipe);
             }
             else if (type == 2) {
                 manageStations(compressorStation);
             }
-            else cout << "ÐÐµÐ²ÐµÑ€Ð½Ñ‹Ð¹ Ð²Ñ‹Ð±Ð¾Ñ€.\n";
+            else cout << "Íåâåðíûé âûáîð.\n";
             break;
         }
         case 5: {
@@ -90,11 +95,11 @@ int main()
             break;
         }
         case 6: {
-            cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¸Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð° Ð´Ð»Ñ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ: ";
+            cout << "Ââåäèòå èìÿ ôàéëà äëÿ ñîõðàíåíèÿ: ";
             string filename;
             getline(cin, filename);
             ofstream file(filename);
-            if (!file.is_open()) { cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ð¸Ñ Ñ„Ð°Ð¹Ð»Ð°\n"; break; }
+            if (!file.is_open()) { cout << "Îøèáêà îòêðûòèÿ ôàéëà\n"; break; }
 
             file << pipe.size() << "\n";
             for (auto& pair : pipe) pair.second.saveToFile(file);
@@ -102,19 +107,19 @@ int main()
             for (auto& pair : compressorStation) pair.second.saveToFile(file);
 
             file.close();
-            cout << "Ð”Ð°Ð½Ð½Ñ‹Ðµ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ñ‹\n";
-            cerr << "Ð”Ð°Ð½Ð½Ñ‹Ðµ ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ñ‹ Ð² Ñ„Ð°Ð¹Ð»: " << filename << "\n";
+            cout << "Äàííûå ñîõðàíåíû\n";
+            cerr << "Äàííûå ñîõðàíåíû â ôàéë: " << filename << "\n";
             break;
         }
         case 7: {
-            cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¸Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð° Ð´Ð»Ñ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ¸: ";
+            cout << "Ââåäèòå èìÿ ôàéëà äëÿ çàãðóçêè: ";
             string filename;
             getline(cin, filename);
             ifstream file(filename);
-            if (!file.is_open()) { cout << "Ð¤Ð°Ð¹Ð» Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½\n"; break; }
+            if (!file.is_open()) { cout << "Ôàéë íå íàéäåí\n"; break; }
 
             int pipeCount, csCount;
-            if (!(file >> pipeCount)) { cout << "ÐžÑˆÐ¸Ð±ÐºÐ°: Ñ„Ð°Ð¹Ð» Ð¿Ð¾Ð²Ñ€ÐµÐ¶Ð´ÐµÐ½!\n"; break; }
+            if (!(file >> pipeCount)) { cout << "Îøèáêà: ôàéë ïîâðåæäåí!\n"; break; }
             file.ignore(10000, '\n');
 
             pipe.clear();
@@ -126,9 +131,9 @@ int main()
                 if (!p.loadFromFile(file)) { isBroken = true; break; }
                 pipe.emplace(p.getId(), p);
             }
-            if (isBroken) { cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ñ‡Ñ‚ÐµÐ½Ð¸Ñ Ñ‚Ñ€ÑƒÐ±!\n"; pipe.clear(); break; }
+            if (isBroken) { cout << "Îøèáêà ÷òåíèÿ òðóá!\n"; pipe.clear(); break; }
 
-            if (!(file >> csCount)) { cout << "ÐžÑˆÐ¸Ð±ÐºÐ°: Ñ„Ð°Ð¹Ð» Ð¿Ð¾Ð²Ñ€ÐµÐ¶Ð´ÐµÐ½!\n"; pipe.clear(); break; }
+            if (!(file >> csCount)) { cout << "Îøèáêà: ôàéë ïîâðåæäåí!\n"; pipe.clear(); break; }
             file.ignore(10000, '\n');
 
             for (int i = 0; i < csCount; ++i) {
@@ -137,23 +142,23 @@ int main()
                 compressorStation.emplace(cs.getId(), cs);
             }
             if (isBroken) {
-                cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ñ‡Ñ‚ÐµÐ½Ð¸Ñ ÐšÐ¡!\n";
+                cout << "Îøèáêà ÷òåíèÿ ÊÑ!\n";
                 pipe.clear();
                 compressorStation.clear();
                 break;
             }
 
             file.close();
-            cout << "Ð—Ð°Ð³Ñ€ÑƒÐ¶ÐµÐ½Ð¾ Ñ‚Ñ€ÑƒÐ±: " << pipe.size() << ", ÐšÐ¡: " << compressorStation.size() << "\n";
-            cerr << "Ð—Ð°Ð³Ñ€ÑƒÐ¶ÐµÐ½Ñ‹ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð°: " << filename << "\n";
+            cout << "Çàãðóæåíî òðóá: " << pipe.size() << ", ÊÑ: " << compressorStation.size() << "\n";
+            cerr << "Çàãðóæåíû äàííûå èç ôàéëà: " << filename << "\n";
             break;
         }
         case 0:
-            cout << "Ð’Ñ‹Ñ…Ð¾Ð´\n";
-            cerr << "=== Ð—ÐÐ’Ð•Ð Ð¨Ð•ÐÐ˜Ð• Ð ÐÐ‘ÐžÐ¢Ð« ===\n";
+            cout << "Âûõîä\n";
+            cerr << "=== Çàâåðøåíèå ðàáîòû! ===\n";
             return 0;
         default:
-            cout << "ÐÐµÐ²ÐµÑ€Ð½Ñ‹Ð¹ Ð¿ÑƒÐ½ÐºÑ‚ Ð¼ÐµÐ½ÑŽ!\n";
+            cout << "Íåâåðíûé ïóíêò ìåíþ!\n";
         }
     }
     return 0;

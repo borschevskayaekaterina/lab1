@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 class Pipe;
 class CompressorStation;
@@ -10,9 +10,8 @@ class CompressorStation;
 int readInt(const std::string& prompt);
 double readDouble(const std::string& prompt);
 
-std::vector<int> findPipes(const std::map<int, Pipe>& pipes);
-std::vector<int> findStations(const std::map<int, CompressorStation>& stations);
-
+std::vector<int> findPipes(const std::unordered_map<int, Pipe>& pipes);
+std::vector<int> findStations(const std::unordered_map<int, CompressorStation>& stations);
 class redirect_output_wrapper
 {
     std::ostream& stream;

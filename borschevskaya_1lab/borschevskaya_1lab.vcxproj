@@ -139,18 +139,17 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="1lab.cpp" />
-    <ClCompile Include="Class_CompressorStation.cpp" />
-    <ClCompile Include="Class_Manager.cpp" />
-    <ClCompile Include="Class_Pipe.cpp" />
-    <ClCompile Include="Class_Utils.cpp" />
+    <ClCompile Include="CompressorStation.cpp" />
+    <ClCompile Include="Manager.cpp" />
+    <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Class_CompressorStation.h" />
-    <ClInclude Include="Class_Manager.h" />
-    <ClInclude Include="Class_Pipe.h" />
-    <ClInclude Include="Class_Utils.h" />
+    <ClInclude Include="CompressorStation.h" />
+    <ClInclude Include="Manager.h" />
+    <ClInclude Include="Pipe.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

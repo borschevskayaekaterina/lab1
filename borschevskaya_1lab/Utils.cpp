@@ -23,20 +23,20 @@ int readInt(const string& prompt) {
         size_t start = line.find_first_not_of(" \t");
         size_t end = line.find_last_not_of(" \t");
         if (start == string::npos) {
-            cout << "РћС€РёР±РєР°! Р’РІРµРґРёС‚Рµ С†РµР»РѕРµ С‡РёСЃР»Рѕ.\n";
+            cout << "Ошибка! Введите целое число.\n";
             continue;
         }
         line = line.substr(start, end - start + 1);
 
         if (!isAllDigits(line)) {
-            cout << "РћС€РёР±РєР°! \"" << line << "\" РЅРµ СЏРІР»СЏРµС‚СЃСЏ С†РµР»С‹Рј С‡РёСЃР»РѕРј.\n";
+            cout << "Ошибка! \"" << line << "\" не является целым числом.\n";
             continue;
         }
         try {
             return stoi(line);
         }
         catch (...) {
-            cout << "РћС€РёР±РєР°! РЎР»РёС€РєРѕРј Р±РѕР»СЊС€РѕРµ С‡РёСЃР»Рѕ.\n";
+            cout << "Ошибка! Слишком большое число.\n";
         }
     }
 }
@@ -50,7 +50,7 @@ double readDouble(const string& prompt) {
         size_t start = line.find_first_not_of(" \t");
         size_t end = line.find_last_not_of(" \t");
         if (start == string::npos) {
-            cout << "РћС€РёР±РєР°! Р’РІРµРґРёС‚Рµ С‡РёСЃР»Рѕ.\n";
+            cout << "Ошибка! Введите число.\n";
             continue;
         }
         line = line.substr(start, end - start + 1);
@@ -65,24 +65,24 @@ double readDouble(const string& prompt) {
             else { ok = false; break; }
         }
         if (!ok || !hasDigit) {
-            cout << "РћС€РёР±РєР°! \"" << line << "\" РЅРµ СЏРІР»СЏРµС‚СЃСЏ С‡РёСЃР»РѕРј.\n";
+            cout << "Ошибка! \"" << line << "\" не является числом.\n";
             continue;
         }
         try {
             return stod(line);
         }
         catch (...) {
-            cout << "РћС€РёР±РєР°! РЎР»РёС€РєРѕРј Р±РѕР»СЊС€РѕРµ С‡РёСЃР»Рѕ.\n";
+            cout << "Ошибка! Слишком большое число.\n";
         }
     }
 }
 
-vector<int> findPipes(const map<int, Pipe>& pipes) {
+vector<int> findPipes(const unordered_map<int, Pipe>& pipes) {
     vector<int> foundIds;
-    int choice = readInt("РСЃРєР°С‚СЊ РїРѕ РЅР°Р·РІР°РЅРёСЋ-1, РїРѕ СЂРµРјРѕРЅС‚Сѓ-2: ");
+    int choice = readInt("Искать по названию-1, по ремонту-2: ");
 
     if (choice == 1) {
-        cout << "Р’РІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёРµ: ";
+        cout << "Введите название (или часть названия): ";
         string query;
         getline(cin, query);
         for (const auto& pair : pipes) {
@@ -92,7 +92,7 @@ vector<int> findPipes(const map<int, Pipe>& pipes) {
         }
     }
     else if (choice == 2) {
-        int state = readInt("РСЃРєР°С‚СЊ РІ СЂРµРјРѕРЅС‚Рµ? (1 - РґР°, 0 - РЅРµС‚): ");
+        int state = readInt("Искать в ремонте? (1 - да, 0 - нет): ");
         for (const auto& pair : pipes) {
             if (pair.second.matchesRepair(state != 0)) {
                 foundIds.push_back(pair.first);
@@ -102,12 +102,12 @@ vector<int> findPipes(const map<int, Pipe>& pipes) {
     return foundIds;
 }
 
-vector<int> findStations(const map<int, CompressorStation>& stations) {
+vector<int> findStations(const unordered_map<int, CompressorStation>& stations) {
     vector<int> foundIds;
-    int choice = readInt("РСЃРєР°С‚СЊ РїРѕ РЅР°Р·РІР°РЅРёСЋ-1, РїРѕ РїСЂРѕС†РµРЅС‚Сѓ РЅРµР·Р°РґРµР№СЃС‚РІРѕРІР°РЅРЅС‹С… С†РµС…РѕРІ-2: ");
+    int choice = readInt("Искать по названию-1, по проценту простоя-2: ");
 
     if (choice == 1) {
-        cout << "Р’РІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёРµ: ";
+        cout << "Введите название (или часть названия): ";
         string query;
         getline(cin, query);
         for (const auto& pair : stations) {
@@ -117,7 +117,13 @@ vector<int> findStations(const map<int, CompressorStation>& stations) {
         }
     }
     else if (choice == 2) {
-        double percent = readDouble("Р’РІРµРґРёС‚Рµ РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РїСЂРѕС†РµРЅС‚ (0-100): ");
+        cout << "Пояснение: простой = (Всего цехов - Работающие) / Всего * 100%.\n";
+        cout << "Пример: если 5 цехов всего, а работает 2, то простой = 60%.\n";
+        double percent = readDouble("Введите минимальный процент простоя (от 0 до 100): ");
+        while (percent < 0 || percent > 100) {
+            cout << "Ошибка! Введите число от 0 до 100: ";
+            percent = readDouble("");
+        }
         for (const auto& pair : stations) {
             if (pair.second.matchesIdlePercent(percent)) {
                 foundIds.push_back(pair.first);
