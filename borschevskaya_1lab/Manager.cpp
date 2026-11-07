@@ -51,17 +51,52 @@ void manageStations(unordered_map<int, CompressorStation>& stations) {
         stations.at(id).print();
     }
 
+    int targetChoice = 0;
+    if (foundIds.size() > 1) {
+        cout << "\nНайдено несколько станций.\n";
+        cout << "1 - Применить действие ко ВСЕМ найденным\n";
+        cout << "2 - Выбрать одну по ID\n";
+        cout << "0 - Отмена\n";
+        targetChoice = readInt("Выбор: ");
+        if (targetChoice == 0) return;
+    }
+    else {
+        targetChoice = 1;
+    }
+
     int action = readInt("\nДействие:\n1-Запустить цех\n2-Остановить цех\n3-Удалить\n0-Отмена\nВыбор: ");
     if (action == 0) return;
 
-    int count = 0;
-    for (int id : foundIds) {
-        if (action == 1) { stations.at(id).startWorkshop(); count++; }
-        else if (action == 2) { stations.at(id).stopWorkshop(); count++; }
-        else if (action == 3) { stations.erase(id); count++; }
+    if (targetChoice == 2) {
+        int chosenId = readInt("Введите ID станции из списка: ");
+        bool found = false;
+        for (int id : foundIds) {
+            if (id == chosenId) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            cout << "Ошибка! Такой ID нет среди найденных.\n";
+            return;
+        }
+
+        if (action == 1) { stations.at(chosenId).startWorkshop(); }
+        else if (action == 2) { stations.at(chosenId).stopWorkshop(); }
+        else if (action == 3) { stations.erase(chosenId); }
+        cout << "Обработана 1 станция (ID " << chosenId << ").\n";
+        cerr << "Управление одной КС ID: " << chosenId << ". Действие: " << action << "\n";
     }
-    cout << "Обработано КС: " << count << "\n";
-    cerr << "Пакетное управление КС. Действие: " << action << ". Обработано: " << count << "\n";
+    else {
+        int count = 0;
+        for (int id : foundIds) {
+            if (action == 1) { stations.at(id).startWorkshop(); count++; }
+            else if (action == 2) { stations.at(id).stopWorkshop(); count++; }
+            else if (action == 3) { stations.erase(id); count++; }
+        }
+        cout << "Обработано КС: " << count << "\n";
+        cerr << "Пакетное управление КС. Действие: " << action << ". Обработано: " << count << "\n";
+    }
 }
 
 void controlSingleStation(unordered_map<int, CompressorStation>& stations) {
