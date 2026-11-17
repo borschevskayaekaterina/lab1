@@ -5,7 +5,6 @@
 #include "Pipe.h"
 #include "CompressorStation.h"
 
-// Структура ребра графа (Соединение)
 struct Connection {
     int fromStationId;
     int toStationId;

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <queue>
+#include <stack>
 
 using namespace std;
 
@@ -189,4 +191,100 @@ void Manager::loadFromFile(const string& filename) {
     }
     cout << "Загружено!\n";
     cerr << "Загружено из файла: " << filename << "\n";
+}
+
+void Manager::connectStations() {
+    if (stations.size() < 2) { cout << "Нужно минимум 2 КС для соединения.\n"; return; }
+
+    cout << "\n--- Доступные КС ---\n";
+    for (const auto& pair : stations) cout << pair.second;
+
+    int fromId = readInt("\nВведите ID КС (вход): ");
+    int toId = readInt("Введите ID КС (выход): ");
+
+    if (stations.find(fromId) == stations.end() || stations.find(toId) == stations.end()) {
+        cout << "Ошибка! Одна из станций не найдена.\n";
+        return;
+    }
+    if (fromId == toId) {
+        cout << "Ошибка! Нельзя соединить станцию саму с собой.\n";
+        return;
+    }
+
+    int diam = readInt("Введите диаметр трубы для соединения (500, 700, 1000, 1400): ");
+    if (diam != 500 && diam != 700 && diam != 1000 && diam != 1400) {
+        cout << "Ошибка! Неверный диаметр.\n";
+        return;
+    }
+
+    int foundPipeId = -1;
+    for (auto& pair : pipes) {
+        if (pair.second.getDiameter() == diam && !pair.second.isBusyPipe() && !pair.second.isRepairing()) {
+            foundPipeId = pair.first;
+            break;
+        }
+    }
+
+    if (foundPipeId == -1) {
+        cout << "Свободной трубы с таким диаметром нет. Создаем новую.\n";
+        Pipe newPipe;
+        newPipe.setDiameter(diam);
+        newPipe.setName("Соединение " + to_string(fromId) + "-" + to_string(toId));
+        cout << "Введите длину новой трубы (км): ";
+        pipes.emplace(newPipe.getId(), newPipe);
+        foundPipeId = newPipe.getId();
+    }
+    else {
+        cout << "Используем свободную трубу с ID: " << foundPipeId << "\n";
+    }
+
+    pipes.at(foundPipeId).setBusy(true);
+
+    network.push_back({ fromId, toId, foundPipeId });
+    cout << "Успешно соединено: КС " << fromId << " -> КС " << toId << " (Труба ID: " << foundPipeId << ")\n";
+    cerr << "Создано соединение: " << fromId << "->" << toId << "\n";
+}
+
+void Manager::topologicalSort() {
+    if (network.empty()) { cout << "Сеть пуста (нет соединений).\n"; return; }
+
+    unordered_map<int, int> inDegree;
+    for (const auto& pair : stations) inDegree[pair.first] = 0; 
+
+    for (const auto& conn : network) {
+        inDegree[conn.toStationId]++;
+    }
+
+    queue<int> q;
+    for (const auto& pair : inDegree) {
+        if (pair.second == 0) q.push(pair.first);
+    }
+
+    vector<int> sortedOrder;
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        sortedOrder.push_back(u);
+
+        for (const auto& conn : network) {
+            if (conn.fromStationId == u) {
+                int v = conn.toStationId;
+                inDegree[v]--;
+                if (inDegree[v] == 0) q.push(v);
+            }
+        }
+    }
+
+    if (sortedOrder.size() != stations.size()) {
+        cout << "Ошибка: В газотранспортной сети есть цикл! Топологическая сортировка невозможна.\n";
+        return;
+    }
+
+    cout << "\n=== Топологический порядок прохождения газа ===\n";
+    int step = 1;
+    for (int id : sortedOrder) {
+        cout << step++ << ". " << stations.at(id).getName() << " (ID: " << id << ")\n";
+    }
+    cerr << "Топологическая сортировка выполнена успешно.\n";
 }
