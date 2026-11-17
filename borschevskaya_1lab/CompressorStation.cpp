@@ -39,16 +39,6 @@ void CompressorStation::input() {
     }
 }
 
-void CompressorStation::print() const {
-    cout << "\nКС с ID: " << id << "\n"
-        << "Название: " << name << "\n"
-        << "Количество цехов: " << numberOfWorkshops << "\n"
-        << "Количество работающих цехов: " << operatingWorkshops << "\n"
-        << "Процент незадействованных (простой): " << getIdlePercent() << "%\n"
-        << "Класс станции: " << stationClass << "\n"
-        << "Станция " << (operatingWorkshops > 0 ? "Работает" : "Простаивает") << "\n";
-}
-
 void CompressorStation::startWorkshop() {
     if (operatingWorkshops < numberOfWorkshops) {
         operatingWorkshops++;
@@ -65,23 +55,6 @@ void CompressorStation::stopWorkshop() {
     else cout << "Нельзя, нет работающих цехов\n";
 }
 
-void CompressorStation::saveToFile(ofstream& file) const {
-    file << id << "\n" << name << "\n" << numberOfWorkshops << "\n" << operatingWorkshops << "\n" << stationClass << "\n";
-}
-
-bool CompressorStation::loadFromFile(ifstream& file) {
-    if (!(file >> id)) return false;
-    file.ignore(10000, '\n');
-    if (!getline(file, name)) return false;
-    if (!(file >> numberOfWorkshops)) return false;
-    if (!(file >> operatingWorkshops)) return false;
-    if (!(file >> stationClass)) return false;
-    file.ignore(10000, '\n');
-
-    updateNextId();
-    return true;
-}
-
 double CompressorStation::getIdlePercent() const {
     if (numberOfWorkshops == 0) return 0;
     return (numberOfWorkshops - operatingWorkshops) * 100.0 / numberOfWorkshops;
@@ -94,4 +67,27 @@ bool CompressorStation::matchesName(const string& query) const {
 
 bool CompressorStation::matchesIdlePercent(double minPercent) const {
     return getIdlePercent() >= minPercent;
+}
+
+ostream& operator<<(ostream& out, const CompressorStation& s) {
+    if (&out == &cout) {
+        out << "\n[КС ID: " << s.id << "] " << s.name
+            << " | Всего цехов: " << s.numberOfWorkshops
+            << " | Работает: " << s.operatingWorkshops
+            << " | Простой: " << s.getIdlePercent() << "%\n";
+    }
+    else {
+        out << s.id << "\n" << s.name << "\n" << s.numberOfWorkshops << "\n" << s.operatingWorkshops << "\n" << s.stationClass;
+    }
+    return out;
+}
+
+istream& operator>>(istream& in, CompressorStation& s) {
+    in >> s.id;
+    in.ignore(10000, '\n');
+    getline(in, s.name);
+    in >> s.numberOfWorkshops >> s.operatingWorkshops >> s.stationClass;
+    in.ignore(10000, '\n');
+    s.updateNextId();
+    return in;
 }

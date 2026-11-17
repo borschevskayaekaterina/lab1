@@ -35,8 +35,7 @@ int main()
 
     cerr << "=== Запуск программы ===\n";
 
-    unordered_map<int, Pipe> pipe;
-    unordered_map<int, CompressorStation> compressorStation;
+    Manager manager;
 
     while (true) {
         cout << "\nМеню\n"
@@ -53,104 +52,29 @@ int main()
         cerr << "Выбран пункт меню: " << choice << "\n";
 
         switch (choice) {
-        case 1: {
-            Pipe newPipe;
-            newPipe.input();
-            pipe.emplace(newPipe.getId(), newPipe);
-            cout << "Труба добавлена (ID " << newPipe.getId() << ")\n";
-            cerr << "Добавлена труба ID: " << newPipe.getId() << "\n";
-            break;
-        }
-        case 2: {
-            CompressorStation newCs;
-            newCs.input();
-            compressorStation.emplace(newCs.getId(), newCs);
-            cout << "КС добавлена (ID " << newCs.getId() << ")\n";
-            cerr << "Добавлена КС ID: " << newCs.getId() << "\n";
-            break;
-        }
-        case 3: {
-            if (pipe.empty() && compressorStation.empty()) {
-                cout << "Пока ничего не введено\n";
-            }
-            else {
-                for (const auto& pair : pipe) pair.second.print();
-                for (const auto& pair : compressorStation) pair.second.print();
-            }
-            break;
-        }
+        case 1: manager.addPipe(); break;
+        case 2: manager.addStation(); break;
+        case 3: manager.viewAll(); break;
         case 4: {
             int type = readInt("С чем работаем? (1 - Трубы, 2 - КС): ");
-            if (type == 1) {
-                managePipes(pipe);
-            }
-            else if (type == 2) {
-                manageStations(compressorStation);
-            }
+            if (type == 1) manager.managePipes();
+            else if (type == 2) manager.manageStations();
             else cout << "Неверный выбор.\n";
             break;
         }
-        case 5: {
-            controlSingleStation(compressorStation);
-            break;
-        }
+        case 5: manager.controlSingleStation(); break;
         case 6: {
             cout << "Введите имя файла для сохранения: ";
             string filename;
             getline(cin, filename);
-            ofstream file(filename);
-            if (!file.is_open()) { cout << "Ошибка открытия файла\n"; break; }
-
-            file << pipe.size() << "\n";
-            for (auto& pair : pipe) pair.second.saveToFile(file);
-            file << compressorStation.size() << "\n";
-            for (auto& pair : compressorStation) pair.second.saveToFile(file);
-
-            file.close();
-            cout << "Данные сохранены\n";
-            cerr << "Данные сохранены в файл: " << filename << "\n";
+            manager.saveToFile(filename);
             break;
         }
         case 7: {
             cout << "Введите имя файла для загрузки: ";
             string filename;
             getline(cin, filename);
-            ifstream file(filename);
-            if (!file.is_open()) { cout << "Файл не найден\n"; break; }
-
-            int pipeCount, csCount;
-            if (!(file >> pipeCount)) { cout << "Ошибка: файл поврежден!\n"; break; }
-            file.ignore(10000, '\n');
-
-            pipe.clear();
-            compressorStation.clear();
-            bool isBroken = false;
-
-            for (int i = 0; i < pipeCount; ++i) {
-                Pipe p;
-                if (!p.loadFromFile(file)) { isBroken = true; break; }
-                pipe.emplace(p.getId(), p);
-            }
-            if (isBroken) { cout << "Ошибка чтения труб!\n"; pipe.clear(); break; }
-
-            if (!(file >> csCount)) { cout << "Ошибка: файл поврежден!\n"; pipe.clear(); break; }
-            file.ignore(10000, '\n');
-
-            for (int i = 0; i < csCount; ++i) {
-                CompressorStation cs;
-                if (!cs.loadFromFile(file)) { isBroken = true; break; }
-                compressorStation.emplace(cs.getId(), cs);
-            }
-            if (isBroken) {
-                cout << "Ошибка чтения КС!\n";
-                pipe.clear();
-                compressorStation.clear();
-                break;
-            }
-
-            file.close();
-            cout << "Загружено труб: " << pipe.size() << ", КС: " << compressorStation.size() << "\n";
-            cerr << "Загружены данные из файла: " << filename << "\n";
+            manager.loadFromFile(filename);
             break;
         }
         case 0:

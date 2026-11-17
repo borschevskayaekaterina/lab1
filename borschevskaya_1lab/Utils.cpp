@@ -101,34 +101,3 @@ vector<int> findPipes(const unordered_map<int, Pipe>& pipes) {
     }
     return foundIds;
 }
-
-vector<int> findStations(const unordered_map<int, CompressorStation>& stations) {
-    vector<int> foundIds;
-    int choice = readInt("Искать по названию-1, по проценту простоя-2: ");
-
-    if (choice == 1) {
-        cout << "Введите название (или часть названия): ";
-        string query;
-        getline(cin, query);
-        for (const auto& pair : stations) {
-            if (pair.second.matchesName(query)) {
-                foundIds.push_back(pair.first);
-            }
-        }
-    }
-    else if (choice == 2) {
-        cout << "Пояснение: простой = (Всего цехов - Работающие) / Всего * 100%.\n";
-        cout << "Пример: если 5 цехов всего, а работает 2, то простой = 60%.\n";
-        double percent = readDouble("Введите минимальный процент простоя (от 0 до 100): ");
-        while (percent < 0 || percent > 100) {
-            cout << "Ошибка! Введите число от 0 до 100: ";
-            percent = readDouble("");
-        }
-        for (const auto& pair : stations) {
-            if (pair.second.matchesIdlePercent(percent)) {
-                foundIds.push_back(pair.first);
-            }
-        }
-    }
-    return foundIds;
-}

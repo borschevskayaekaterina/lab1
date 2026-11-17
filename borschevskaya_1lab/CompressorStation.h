@@ -16,20 +16,15 @@ private:
 
 public:
     CompressorStation();
-
     int getId() const;
     std::string getName() const;
-
     void input();
-    void print() const;
-
     void startWorkshop();
     void stopWorkshop();
-
-    void saveToFile(std::ofstream& file) const;
-    bool loadFromFile(std::ifstream& file);
-
     double getIdlePercent() const;
     bool matchesName(const std::string& query) const;
     bool matchesIdlePercent(double minPercent) const;
+
+    friend std::ostream& operator<<(std::ostream& out, const CompressorStation& s);
+    friend std::istream& operator>>(std::istream& in, CompressorStation& s);
 };
