@@ -46,6 +46,8 @@ int main()
             << "5. Запуск/остановка цеха на конкретной КС\n"
             << "6. Сохранить в файл\n"
             << "7. Загрузить из файла\n"
+            << "8. Соединить КС трубой (создать сеть)\n"   
+            << "9. Топологическая сортировка сети\n"           
             << "0. Выход\n\n";
 
         int choice = readInt("Ваш выбор: ");
@@ -59,27 +61,27 @@ int main()
             int type = readInt("С чем работаем? (1 - Трубы, 2 - КС): ");
             if (type == 1) manager.managePipes();
             else if (type == 2) manager.manageStations();
-            else cout << "Неверный выбор.\n";
             break;
         }
         case 5: manager.controlSingleStation(); break;
         case 6: {
-            cout << "Введите имя файла для сохранения: ";
             string filename;
+            cout << "Имя файла: ";
             getline(cin, filename);
             manager.saveToFile(filename);
             break;
         }
         case 7: {
-            cout << "Введите имя файла для загрузки: ";
             string filename;
+            cout << "Имя файла: ";
             getline(cin, filename);
             manager.loadFromFile(filename);
             break;
         }
+        case 8: manager.connectStations(); break;   
+        case 9: manager.topologicalSort(); break;   
         case 0:
             cout << "Выход\n";
-            cerr << "=== Завершение работы! ===\n";
             return 0;
         default:
             cout << "Неверный пункт меню!\n";
